@@ -14,7 +14,7 @@ The project requires a few dependencies to be installed on the Raspberry PI.
 - [gcc](https://gcc.gnu.org/) compiler  
 - [cmake](https://cmake.org/) a build system for the build system
 - [WiringPi](https://github.com/WiringPi/WiringPi) an open source popular GPIO library for the Raspberry PI
-- [libconfuse](https://github.com/libconfuse/libconfuse) an open source config file processor library
+- [libconfuse](https://github.com/libconfuse/libconfuse) an open source config file library
 
 These commands are all thats needed to get the PI configured for development.
 ```console
