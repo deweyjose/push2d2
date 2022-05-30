@@ -20,6 +20,7 @@ The project requires a few dependencies to be installed on the Raspberry PI.
 - [cmake](https://cmake.org/) a build system for the build system
 - [WiringPi](https://github.com/WiringPi/WiringPi) an open source popular GPIO library for the Raspberry PI
 - [libconfuse](https://github.com/libconfuse/libconfuse) an open source config file library
+- [gtest](https://google.github.io/googletest/quickstart-cmake.html) Google Test framework
 
 These commands are all thats needed to get the PI configured for development.
 ```console
@@ -32,4 +33,9 @@ cd confuse-3.3/
 ./configure --prefix=/usr && make -j9
 sudo ldconfig
 sudo make install
+sudo apt-get install libgtest-dev
+cd /usr/src/gtest
+sudo cmake CMakeLists.txt
+sudo make
+sudo cp *.a /usr/lib
 ```

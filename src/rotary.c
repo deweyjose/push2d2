@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <wiringPi.h>
 #include <memory.h>
-#include "rotary.h"
+#include "include/rotary.h"
 
 #define DEGREES 360.00
 

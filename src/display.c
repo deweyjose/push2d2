@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <lcd.h>
 #include <unistd.h>
-#include "display.h"
-#include "config.h"
+#include "include/display.h"
+#include "include/config.h"
 
 #define log(format, ...) printf("DISPLAY: " format "\n" , ##__VA_ARGS__)
 
