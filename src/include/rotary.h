@@ -8,7 +8,9 @@
 #include "config.h"
 
 int rotary_initialize(const struct config * config);
-double rotary_get_azimuth();
-double rotary_get_altitude();
+
+long double rotary_get_azimuth();
+
+long double rotary_get_altitude();
 
 #endif //P2D2_ROTARY_H

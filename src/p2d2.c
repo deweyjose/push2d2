@@ -10,14 +10,12 @@
 #include "display.h"
 #include "rotary.h"
 #include "config.h"
+#include "calc.h"
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
-int main(int argc, char* argv[]) {
-
+int main(int argc, char *argv[]) {
     log("Push2D2 version %d.%d", P2D2_VERSION_MAJOR, P2D2_MINOR);
-
-    usleep(1000000);
 
     struct config config;
     memset(&config, 0, sizeof(struct config));
@@ -42,18 +40,19 @@ int main(int argc, char* argv[]) {
         return ERROR_INITIALIZE_ROTARY;
     }
 
-    display_text("move the scope",0);
+    display_text("move the scope", 0);
     fflush(stdout);
 
-    while(1) {
-
+    while (1) {
         sleep(1);
         display_clear();
         char buffer[16];
-        sprintf(buffer, "Az %*.4Lf", 3,  rotary_get_azimuth());
+        sprintf(buffer, "Az %*.4Lf", 3, rotary_get_azimuth());
         display_text(buffer, 0);
-        sprintf(buffer, "A  %*.4Lf", 3,  rotary_get_altitude());
+        sprintf(buffer, "A  %*.4Lf", 3, rotary_get_altitude());
         display_text(buffer, 1);
         fflush(stdout);
     }
+
+    // close the serial port
 }

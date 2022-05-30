@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <wiringPi.h>
 #include <memory.h>
-#include "rotary.h"
+#include <rotary.h>
 
 #define DEGREES 360.00
 
@@ -76,16 +76,16 @@ int rotary_initialize(const struct config *config) {
     altitude_encoder.degrees_per_encoded = DEGREES / altitude_encoder.max_encoded;
     --altitude_encoder.max_encoded;
 
-    log("Azimuth degrees per encoded %Lf", azimuth_encoder.degrees_per_encoded);
-    log("Altitude degrees per encoded %Lf", altitude_encoder.degrees_per_encoded);
+    log("Azimuth base per encoded %Lf", azimuth_encoder.degrees_per_encoded);
+    log("Altitude base per encoded %Lf", altitude_encoder.degrees_per_encoded);
     return 1;
 }
 
-double rotary_get_azimuth() {
+long double rotary_get_azimuth() {
     return azimuth_encoder.encoder_count * azimuth_encoder.degrees_per_encoded;
 }
 
-double rotary_get_altitude() {
+long double rotary_get_altitude() {
     return altitude_encoder.encoder_count * altitude_encoder.degrees_per_encoded;;
 }
 
