@@ -70,8 +70,20 @@ long double gst(long double jd, struct tm *tm_ptr) {
     long double T0 = GST_TC1 + (GST_TC2 * T) + (GST_TC3 * T * T);
     long double T0P = T0 - (24 * TRUNC(T0 / 24));
     long double A = GST_UTC1 * decimal_hours(tm_ptr);
-    long double GST = A + T0P;
-    return (GST - (24 * TRUNC(GST / 24)));
+    long double gst = A + T0P;
+    return (gst - (24 * TRUNC(gst / 24)));
+}
+
+/**
+ * Compute Local Sidereal Time.
+ * @param gst
+ * @param longitude
+ * @return
+ */
+long double lst(long double gst, long double longitude) {
+    long double longHours = longitude / 15;
+    long double lst = gst + longHours;
+    return lst - (24 * TRUNC(lst/24));
 }
 
 /**
@@ -81,11 +93,37 @@ long double gst(long double jd, struct tm *tm_ptr) {
  * @param latitude
  * @return
  */
-extern long double dec(long double altitude, long double azimuth, long double latitude) {
+long double dec(long double altitude, long double azimuth, long double latitude) {
     long double rAltitude = rad(altitude);
     long double rAzimuth = rad(azimuth);
     long double rLatitude = rad(latitude);
     long double sinDec = (sinl(rLatitude) * sinl(rAltitude)) + (cosl(rLatitude) * cosl(rAltitude) * cosl(rAzimuth));
     long double asinDec = asinl(sinDec);
     return deg(asinDec);
+}
+
+/**
+ * Computes Hour Angle
+ * @param altitude
+ * @param latitude
+ * @param dec
+ * @return
+ */
+long double ha(long double altitude, long double latitude, long double dec) {
+    long double rAltitude = rad(altitude);
+    long double rLatitude = rad(latitude);
+    long double rDec = rad(dec);
+    long double cosHA = (sin(rAltitude) - (sin(rLatitude) * sin(rDec))) / (cos(rLatitude) * cos(rDec));
+    long double acosHA = acosl(cosHA);
+    return deg(acosHA);
+}
+
+/**
+ * Compute Right Ascension.
+ * @param lst
+ * @param ha
+ * @return
+ */
+long double ra(long double lst, long double ha) {
+    return lst - ha;
 }

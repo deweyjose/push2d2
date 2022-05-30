@@ -24,10 +24,23 @@ extern long double jd_from_time_t(struct tm * tm_ptr);
 #define GST_TC3 0.000025862
 #define GST_UTC1 1.002737909
 
+// Greenwich Sidereal Time
 extern long double gst(long double jd, struct tm *tm_ptr);
+
+// Local Sidereal time
+
+extern long double lst(long double gst, long double longitude);
 
 // Declination
 
 extern long double dec(long double altitude, long double azimuth, long double latitude);
+
+// Hour Angle
+
+extern long double ha(long double altitude, long double latitude, long double dec);
+
+// Right Ascension
+
+extern long double ra(long double lst, long double ha);
 
 #endif //PUSH2D2_CALC_H
