@@ -5,6 +5,10 @@
 #ifndef P2D2_PROTOCOL_H
 #define P2D2_PROTOCOL_H
 
+#include <config.h>
+
+char * process_request(char * input, char * output, struct coordinates * location);
+
 char * response_ra(char * buffer, long double ra);
 
 char * response_dec(char *buffer, long double dec);

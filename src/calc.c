@@ -46,7 +46,7 @@ long double jd() {
  */
 long double jd_from_time_t(struct tm *tm_ptr) {
     struct tm tm = *tm_ptr;
-    int year = tm.tm_year += 1900;
+    int year = tm.tm_year + 1900;
     long double day_fraction = decimal_hours(tm_ptr) / 24;
     long double day_decimal = (long double) tm.tm_mday + day_fraction;
     year = (tm.tm_mon < 3 ? year - 1 : year);
@@ -60,11 +60,17 @@ long double jd_from_time_t(struct tm *tm_ptr) {
     return JD;
 }
 
+long double gst() {
+    time_t t = time(NULL);
+    struct tm *tm_ptr = localtime(&t);
+    return gst_from_jd_tm(jd_from_time_t(tm_ptr), tm_ptr);
+}
+
 /**
  * Compute Greenwich Sidereal Time in decimal hours.
  * @return
  */
-long double gst(long double jd, struct tm *tm_ptr) {
+long double gst_from_jd_tm(long double jd, struct tm *tm_ptr) {
     long double S = jd - GST_JD_EPOCH;
     long double T = S / GST_TC0;
     long double T0 = GST_TC1 + (GST_TC2 * T) + (GST_TC3 * T * T);

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <calc.h>
 #include <protocol.h>
+#include <config.h>
 
 #define log(format, ...) printf("TEST: " format "\n" , ##__VA_ARGS__)
 #define EPSILON 0.00001
@@ -17,6 +18,10 @@ short assertEqualsl(long double l, long double r) {
 
 short assertEquals(long l, long r) {
     return l == r;
+}
+
+short assertEqualsStr(char *l, char *r) {
+    return strcmp(l, r) == 0;
 }
 
 void test_jd() {
@@ -49,7 +54,7 @@ void test_gst() {
     test_tm.tm_sec = 57;
 
     long double jd = jd_from_time_t(&test_tm);
-    long double result = gst(jd, &test_tm);
+    long double result = gst_from_jd_tm(jd, &test_tm);
     long double expected = 19.509501;
 
     if (!assertEqualsl(result, expected)) {
@@ -136,14 +141,66 @@ void test_deg_mins_secs() {
 
 void test_response_ra() {
     char response[35];
+    char *expected = "12:52:27#";
     response_ra(response, 12.87444367);
-    log("ra %s", response);
+    if (!assertEqualsStr(response, expected)) {
+        log("ERROR test_response_ra: %s != %s", response, expected);
+        exit(1);
+    }
+    log("SUCCESS test_response_ra: %s == %s", response, expected);
 }
 
 void test_response_dec() {
     char response[35];
+    char *expected = "+10*28'04#";
     response_dec(response, 10.46797995);
-    log("dec %s", response);
+    if (!assertEqualsStr(response, expected)) {
+        log("ERROR test_response_dec: %s != %s", response, expected);
+        exit(1);
+    }
+    log("SUCCESS test_response_dec: %s == %s", response, expected);
+}
+
+void test_process_request() {
+    struct coordinates loc;
+    memset(&loc, 0, sizeof(struct coordinates));
+    loc.latitude = 42.78842222;
+    loc.longitude = 71.20088889;
+
+    char *request_ra = ":GR#";
+    char *expected_ra_response = "12:52:27#";
+
+    char response_buffer[35];
+    memset(response_buffer, 0, 32);
+    process_request(request_ra, response_buffer, &loc);
+    if (!assertEqualsStr(response_buffer, expected_ra_response)) {
+        log("ERROR test_process_request ra: %s != %s", response_buffer, expected_ra_response);
+        //exit(1);
+    } else {
+        log("SUCCESS test_process_request ra: %s == %s", response_buffer, expected_ra_response);
+    }
+
+    memset(response_buffer, 0, 32);
+    char *request_dec = ":GD#";
+    char *expected_dec_response = "+10*28'04#";
+    process_request(request_dec, response_buffer, &loc);
+    if (!assertEqualsStr(response_buffer, expected_dec_response)) {
+        log("ERROR test_process_request dec: %s != %s", response_buffer, expected_dec_response);
+        //exit(1);
+    } else {
+        log("SUCCESS test_process_request dec: %s == %s", response_buffer, expected_dec_response);
+    }
+
+    memset(response_buffer, 0, 32);
+    char *request_bla = ":BLA#";
+    char *expected_bla_response = "\0x15";
+    process_request(request_bla, response_buffer, &loc);
+    if (!assertEqualsStr(response_buffer, expected_bla_response)) {
+        log("ERROR test_process_request bla: %s != %s", response_buffer, expected_bla_response);
+        //exit(1);
+    } else {
+        log("SUCCESS test_process_request bla: %s == %s", response_buffer, expected_bla_response);
+    }
 }
 
 int main(int argc, char **argv) {
@@ -156,4 +213,5 @@ int main(int argc, char **argv) {
     test_deg_mins_secs();
     test_response_ra();
     test_response_dec();
+    test_process_request();
 }

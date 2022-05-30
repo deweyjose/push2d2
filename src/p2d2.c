@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
 
     while (1) {
-
         sleep(1);
         display_clear();
         char buffer[16];
@@ -54,4 +53,6 @@ int main(int argc, char *argv[]) {
         display_text(buffer, 1);
         fflush(stdout);
     }
+
+    // close the serial port
 }

@@ -25,7 +25,10 @@ extern long double jd_from_time_t(struct tm * tm_ptr);
 #define GST_UTC1 1.002737909
 
 // Greenwich Sidereal Time
-extern long double gst(long double jd, struct tm *tm_ptr);
+
+extern long double gst();
+
+extern long double gst_from_jd_tm(long double jd, struct tm *tm_ptr);
 
 // Local Sidereal time
 
