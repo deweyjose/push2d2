@@ -7,21 +7,15 @@
 #include <wiringPi.h>
 #include <string.h>
 #include "p2d2.h"
-#include "include/display.h"
-#include "include/rotary.h"
-#include "include/config.h"
-#include "include/calc.h"
+#include "display.h"
+#include "rotary.h"
+#include "config.h"
+#include "calc.h"
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
 int main(int argc, char *argv[]) {
     log("Push2D2 version %d.%d", P2D2_VERSION_MAJOR, P2D2_MINOR);
-    for (int i = 0; i < 10; ++i) {
-        log("Julian Date %Lf", jd());
-        fflush(stdout);
-        usleep(1000000);
-    }
-
 
     struct config config;
     memset(&config, 0, sizeof(struct config));

@@ -127,3 +127,17 @@ long double ha(long double altitude, long double latitude, long double dec) {
 long double ra(long double lst, long double ha) {
     return lst - ha;
 }
+
+/**
+ * Compute decimal base, mins secs.
+ * @param deg
+ * @param ddms
+ * @return
+ */
+struct dec_mins_secs * ddms(long double deg, struct dec_mins_secs * out) {
+    out->base = TRUNC(deg);
+    long double minutes = (deg - out->base) * 60;
+    out->minutes = TRUNC(minutes);
+    out->seconds = (minutes - out->minutes) * 60;
+    return out;
+}

@@ -43,4 +43,14 @@ extern long double ha(long double altitude, long double latitude, long double de
 
 extern long double ra(long double lst, long double ha);
 
+// decimal base minutes seconds
+
+struct dec_mins_secs {
+    short base;
+    short minutes;
+    short seconds;
+};
+
+extern struct dec_mins_secs * ddms(long double deg, struct dec_mins_secs * out);
+
 #endif //PUSH2D2_CALC_H
