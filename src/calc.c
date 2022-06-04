@@ -115,13 +115,18 @@ long double dec(long double altitude, long double azimuth, long double latitude)
  * @param dec
  * @return
  */
-long double ha(long double altitude, long double latitude, long double dec) {
+long double ha(long double azimuth, long double altitude, long double latitude, long double dec) {
     long double rAltitude = rad(altitude);
     long double rLatitude = rad(latitude);
     long double rDec = rad(dec);
-    long double cosHA = (sin(rAltitude) - (sin(rLatitude) * sin(rDec))) / (cos(rLatitude) * cos(rDec));
+    long double cosHA = (sinl(rAltitude) - (sinl(rLatitude) * sinl(rDec))) / (cosl(rLatitude) * cosl(rDec));
     long double acosHA = acosl(cosHA);
-    return deg(acosHA);
+    long double HA = deg(acosHA);
+    if (sinl(rad(azimuth)) < 0){
+        return HA;
+    } else {
+        return 360.0 - HA;
+    }
 }
 
 /**
@@ -131,7 +136,8 @@ long double ha(long double altitude, long double latitude, long double dec) {
  * @return
  */
 long double ra(long double lst, long double ha) {
-    return lst - ha;
+    long double ra = lst - ha;
+    return ra > 0 ? ra : ra + 24;
 }
 
 /**
@@ -140,10 +146,16 @@ long double ra(long double lst, long double ha) {
  * @param ddms
  * @return
  */
-struct dec_mins_secs * ddms(long double deg, struct dec_mins_secs * out) {
+struct dec_mins_secs * to_dms(long double deg, struct dec_mins_secs * out) {
     out->base = TRUNC(deg);
     long double minutes = (deg - out->base) * 60;
     out->minutes = TRUNC(minutes);
     out->seconds = (minutes - out->minutes) * 60;
     return out;
+}
+
+long double from_dms(struct dec_mins_secs * input) {
+    long double seconds = (long double)input->seconds / 60;
+    long double minutes = (long double)input->minutes + seconds;
+    return (long double)input->base + (minutes/60);
 }

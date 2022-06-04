@@ -46,7 +46,7 @@ void display_clear() {
 }
 
 void display_text(char *text, int line) {
-    log("=> lcd: %s", text);
+    //log("=> lcd: %s", text);
     lcdPosition(lcd, 0, line);
     lcdPuts(lcd, text);
 }

@@ -6,11 +6,13 @@
 #include <unistd.h>
 #include <wiringPi.h>
 #include <string.h>
-#include "p2d2.h"
-#include "display.h"
-#include "rotary.h"
-#include "config.h"
-#include "calc.h"
+#include <p2d2.h>
+#include <display.h>
+#include <rotary.h>
+#include <config.h>
+#include <calc.h>
+#include <serial.h>
+#include "protocol.h"
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
@@ -40,19 +42,35 @@ int main(int argc, char *argv[]) {
         return ERROR_INITIALIZE_ROTARY;
     }
 
+    if (!serial_initialize(&config.serial)) {
+        return ERROR_INITIALIZE_SERIAL;
+    }
+
+    if (!protocol_initialize()){
+        log("failed to initialize protocol layer");
+        return ERROR_INITIALIZE_PROTOCOL;
+    }
+
     display_text("move the scope", 0);
+
     fflush(stdout);
 
     while (1) {
-        sleep(1);
+        char request[32];
+        if (serial_read(request)) {
+            char response[32];
+            protocol_handle_request(request, response, &config.coordinates);
+            serial_write(response);
+        }
+
         display_clear();
         char buffer[16];
-        sprintf(buffer, "Az %*.4Lf", 3, rotary_get_azimuth());
+        sprintf(buffer, "A  %Lf", rotary_get_altitude());
         display_text(buffer, 0);
-        sprintf(buffer, "A  %*.4Lf", 3, rotary_get_altitude());
+        sprintf(buffer, "AZ %Lf", rotary_get_azimuth());
         display_text(buffer, 1);
+        usleep(100000);
+
         fflush(stdout);
     }
-
-    // close the serial port
 }

@@ -13,8 +13,8 @@
 
 #define JD_CONSTANT 1720994.5
 
-extern long double jd();
-extern long double jd_from_time_t(struct tm * tm_ptr);
+long double jd();
+long double jd_from_time_t(struct tm * tm_ptr);
 
 // Greenwich Sidereal Time
 #define GST_JD_EPOCH 2451545.5
@@ -26,25 +26,25 @@ extern long double jd_from_time_t(struct tm * tm_ptr);
 
 // Greenwich Sidereal Time
 
-extern long double gst();
+long double gst();
 
-extern long double gst_from_jd_tm(long double jd, struct tm *tm_ptr);
+long double gst_from_jd_tm(long double jd, struct tm *tm_ptr);
 
 // Local Sidereal time
 
-extern long double lst(long double gst, long double longitude);
+long double lst(long double gst, long double longitude);
 
 // Declination
 
-extern long double dec(long double altitude, long double azimuth, long double latitude);
+long double dec(long double altitude, long double azimuth, long double latitude);
 
 // Hour Angle
 
-extern long double ha(long double altitude, long double latitude, long double dec);
+long double ha(long double azimuth, long double altitude, long double latitude, long double dec);
 
 // Right Ascension
 
-extern long double ra(long double lst, long double ha);
+long double ra(long double lst, long double ha);
 
 // decimal base minutes seconds
 
@@ -54,6 +54,8 @@ struct dec_mins_secs {
     short seconds;
 };
 
-extern struct dec_mins_secs * ddms(long double deg, struct dec_mins_secs * out);
+struct dec_mins_secs * to_dms(long double deg, struct dec_mins_secs * out);
+
+long double from_dms(struct dec_mins_secs *input);
 
 #endif //PUSH2D2_CALC_H

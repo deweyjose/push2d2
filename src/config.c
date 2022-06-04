@@ -4,18 +4,26 @@
 
 #include <string.h>
 #include <confuse.h>
-#include "config.h"
+#include <config.h>
+#include <malloc.h>
 
 // remapping for readability and reduce bugs/mistypes
 #define cf(name) CFG_FLOAT(name, 0, CFGF_NONE)
 #define ci(name) CFG_INT(name, 0, CFGF_NONE)
+#define cs(name) CFG_STR(name, 0, CFGF_NONE)
 #define cend() CFG_END()
-#define dcgi( prop ) config->display_config.prop = cfg_getint(display_cfg, #prop)
-#define rcgi( prop ) rconf->prop = cfg_getint(rotary, #prop)
+#define dcgi(prop) config->display_config.prop = cfg_getint(display_cfg, #prop)
+#define rcgi(prop) rconf->prop = cfg_getint(rotary, #prop)
 #define log(format, ...) printf("CONFIG: " format "\n" , ##__VA_ARGS__)
 
-int config_load(struct config *config, char * filename) {
+int config_load(struct config *config, char *filename) {
     log("loading config file %s", filename);
+
+    cfg_opt_t serial_opts[] = {
+            cs("device"),
+            ci("baud_rate"),
+            cend()
+    };
 
     cfg_opt_t coordinates_opts[] = {
             cf("latitude"),
@@ -49,6 +57,7 @@ int config_load(struct config *config, char * filename) {
     };
 
     cfg_opt_t secs_opts[] = {
+            CFG_SEC("serial", serial_opts, CFGF_NONE),
             CFG_SEC("coordinates", coordinates_opts, CFGF_NONE),
             CFG_SEC("display", display_opts, CFGF_NONE),
             CFG_SEC("rotary", rotary_opts, CFGF_TITLE | CFGF_MULTI)
@@ -57,25 +66,40 @@ int config_load(struct config *config, char * filename) {
     // load the options file
     cfg_t *cfg;
     cfg = cfg_init(secs_opts, CFGF_NONE);
-    if(cfg_parse(cfg, filename) == CFG_PARSE_ERROR) {
+    if (cfg_parse(cfg, filename) == CFG_PARSE_ERROR) {
         log("failed to parse %s", filename);
         return 0;
     }
 
+    cfg_t *serial_cfg = cfg_getsec(cfg, "serial");
+
+    char *tmpDevice = cfg_getstr(serial_cfg, "device");
+    int str_len = strlen(tmpDevice) + 1;
+    config->serial.device = (char *) malloc(str_len);
+    strcpy(config->serial.device, tmpDevice);
+
+    config->serial.baud_rate = cfg_getint(serial_cfg, "baud_rate");
+
     // map the options into the configuration struct
 
-    cfg_t * coordinates_cfg = cfg_getsec(cfg, "coordinates");
+    cfg_t *coordinates_cfg = cfg_getsec(cfg, "coordinates");
     config->coordinates.longitude = cfg_getfloat(coordinates_cfg, "longitude");
     config->coordinates.latitude = cfg_getfloat(coordinates_cfg, "latitude");
 
-    cfg_t * display_cfg = cfg_getsec(cfg, "display");
+    cfg_t *display_cfg = cfg_getsec(cfg, "display");
     dcgi(rows);
     dcgi(columns);
     dcgi(bit_mode);
     dcgi(register_select_pin);
     dcgi(enable_pin);
-    dcgi(d0_pin); dcgi(d1_pin); dcgi(d2_pin); dcgi(d3_pin);
-    dcgi(d4_pin); dcgi(d5_pin); dcgi(d6_pin); dcgi(d7_pin);
+    dcgi(d0_pin);
+    dcgi(d1_pin);
+    dcgi(d2_pin);
+    dcgi(d3_pin);
+    dcgi(d4_pin);
+    dcgi(d5_pin);
+    dcgi(d6_pin);
+    dcgi(d7_pin);
 
     int rotarySections = cfg_size(cfg, "rotary");
     if (rotarySections != 2) {
@@ -84,11 +108,11 @@ int config_load(struct config *config, char * filename) {
     }
 
     for (int i = 0; i < rotarySections; ++i) {
-        cfg_t * rotary = cfg_getnsec(cfg, "rotary", i);
+        cfg_t *rotary = cfg_getnsec(cfg, "rotary", i);
 
-        struct rotary_config * rconf = (strcmp(cfg_title(rotary), "azimuth") == 0) ?
-                &config->azimuth_config :
-                &config->altitude_config;
+        struct rotary_config *rconf = (strcmp(cfg_title(rotary), "azimuth") == 0) ?
+                                      &config->azimuth_config :
+                                      &config->altitude_config;
 
         rcgi(phase_a_pin);
         rcgi(phase_b_pin);
@@ -100,7 +124,7 @@ int config_load(struct config *config, char * filename) {
     return 1;
 }
 
-void config_dump(struct config * config) {
+void config_dump(struct config *config) {
     log("CONFIG dump:");
     log("coordinates:");
     log("  latitude: %LF", config->coordinates.latitude);

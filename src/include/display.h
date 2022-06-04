@@ -8,7 +8,9 @@
 #include "config.h"
 
 int display_initialize(const struct config *s);
+
 void display_clear();
+
 void display_text(char * text, int line);
 
 #endif //P2D2_DISPLAY_H
