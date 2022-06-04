@@ -50,7 +50,7 @@ long double jd_from_time_t(struct tm *tm_ptr) {
     return JD;
 }
 
-time_t test_time = NULL;
+time_t test_time = 0;
 
 void set_test_time(time_t time) {
     test_time = time;
