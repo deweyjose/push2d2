@@ -13,4 +13,8 @@ long double rotary_get_azimuth();
 
 long double rotary_get_altitude();
 
+void rotary_set_azimuth(long double azimuth);
+
+void rotary_set_altitude(long double altitude);
+
 #endif //P2D2_ROTARY_H

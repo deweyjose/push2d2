@@ -7,7 +7,9 @@
 
 #include <config.h>
 
-char * process_request(char * input, char * output, struct coordinates * location);
+int protocol_initialize();
+
+char * protocol_handle_request(char * input, char * output, struct coordinates * location);
 
 char * response_ra(char * buffer, long double ra);
 
