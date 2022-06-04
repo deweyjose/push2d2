@@ -12,7 +12,7 @@
 #include <config.h>
 #include <calc.h>
 #include <serial.h>
-#include "protocol.h"
+#include <protocol.h>
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
