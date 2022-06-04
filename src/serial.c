@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <serial.h>
 #include <wiringSerial.h>
-#include <malloc.h>
 
 #define log(format, ...) printf("SERIAL: " format "\n" , ##__VA_ARGS__)
 
@@ -14,7 +13,7 @@ int serial = 0;
 int serial_initialize(struct serial *config) {
     serial = serialOpen(config->device, config->baud_rate);
     if (serial == -1) {
-       // log("failed to initialize serial device %s, baud rate %d", config->device, config->baud_rate);
+        log("failed to initialize serial device %s, baud rate %d", config->device, config->baud_rate);
         return 0;
     }
     return 1;

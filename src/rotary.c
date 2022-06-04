@@ -55,11 +55,12 @@ void rotary_read_pins(struct rotary_info *info) {
     info->last_encoded = encoded;
 }
 
+__attribute__((unused))
 void rotary_azimuth_callback() {
     rotary_read_pins(&azimuth_encoder);
 }
 
-void rotary_altitude_callback() {
+__attribute__((unused)) void rotary_altitude_callback() {
     rotary_read_pins(&altitude_encoder);
 }
 
@@ -88,8 +89,6 @@ int rotary_initialize(const struct config *config) {
     altitude_encoder.max_reset = altitude_encoder.max_encoded;
     altitude_encoder.min_reset = 0;
 
-    log("Azimuth base per encoded %Lf", azimuth_encoder.degrees_per_encoded);
-    log("Altitude base per encoded %Lf", altitude_encoder.degrees_per_encoded);
     return 1;
 }
 
@@ -102,10 +101,10 @@ long double rotary_get_altitude() {
 }
 
 void rotary_set_azimuth(long double azimuth) {
-    azimuth_encoder.encoder_count = azimuth / azimuth_encoder.degrees_per_encoded;
+    azimuth_encoder.encoder_count = (long)(azimuth / azimuth_encoder.degrees_per_encoded);
 }
 
 void rotary_set_altitude(long double altitude) {
-    altitude_encoder.encoder_count = altitude / altitude_encoder.degrees_per_encoded;
+    altitude_encoder.encoder_count = (long)(altitude / altitude_encoder.degrees_per_encoded);
 }
 

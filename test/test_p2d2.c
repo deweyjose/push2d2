@@ -14,35 +14,42 @@
 #define log(format, ...) printf("TEST: " format "\n" , ##__VA_ARGS__)
 #define EPSILON 0.00001
 
-short assertEqualsl(long double l, long double r) {
-    return fabs(l - r) < EPSILON;
+int assertEqualsLD(long double l, long double r) {
+    return fabsl(l - r) < EPSILON;
 }
 
-short assertEquals(long l, long r) {
+int assertEquals(long l, long r) {
     return l == r;
 }
 
-short assertEqualsStr(char *l, char *r) {
+int assertEqualsStr(char *l, char *r) {
     return strcmp(l, r) == 0;
 }
+
+#define ASSERT_EQUALS(expected, actual) \
+if (!assertEquals(expected, actual)) { \
+    log("ERROR %s: %d != %d", __FUNCTION__ , expected, actual); \
+} \
+
+#define ASSERT_EQUALS_LD(expected, actual) \
+if (!assertEqualsLD(expected, actual)) { \
+    log("ERROR %s: %Lf != %Lf", __FUNCTION__ , expected, actual); \
+}                                         \
+
+#define ASSERT_EQUALS_STR(expected, actual) \
+if (!assertEqualsStr(expected, actual)) { \
+    log("ERROR %s: %s != %s", __FUNCTION__ , expected, actual); \
+}                                         \
+
+#define SUCCESS() log("SUCCESS %s", __FUNCTION__)
 
 void test_to_dms() {
     struct dec_mins_secs out;
     to_dms(182.524167, &out);
-    if (!assertEquals(182, out.base)) {
-        log("ERROR test_to_dms: %d != %d", 182, out.base);
-        exit(1);
-    }
-    if (!assertEquals(31, out.minutes)) {
-        log("ERROR test_to_dms: %d != %d", 31, out.minutes);
-        exit(1);
-    }
-
-    if (!assertEquals(27, out.seconds)) {
-        log("ERROR test_to_dms: %d != %d", 27, out.seconds);
-        exit(1);
-    }
-    log("SUCCESS test_to_dms");
+    ASSERT_EQUALS(182, out.base);
+    ASSERT_EQUALS(31, out.minutes);
+    ASSERT_EQUALS(27, out.seconds);
+    SUCCESS();
 }
 
 void test_from_dms() {
@@ -54,11 +61,8 @@ void test_from_dms() {
     long double result = from_dms(&input);
     long double expected = 182.524167;
 
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_from_dms: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_from_dms");
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_jd() {
@@ -72,12 +76,10 @@ void test_jd() {
     test_tm.tm_sec = 57;
 
     long double result = jd_from_time_t(&test_tm);
-    long double expected = 2459721.647882;
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_jd: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_jd: %Lf == %Lf", result, expected);
+    long double expected = 2459721.6478819;
+
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_gst() {
@@ -94,11 +96,8 @@ void test_gst() {
     long double result = gst_from_jd_tm(jd, &test_tm);
     long double expected = 19.509501;
 
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_gst: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_gst: %Lf == %Lf", result, expected);
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_lst() {
@@ -106,11 +105,9 @@ void test_lst() {
     long double longitude = -71.20088889;
     long double result = lst(gst, longitude);
     long double expected = 14.41672417;
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_lst: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_lst: %Lf == %Lf", result, expected);
+
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_dec() {
@@ -121,11 +118,8 @@ void test_dec() {
     long double result = dec(altitude, azimuth, latitude);
     long double expected = 10.46797995;
 
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_dec: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_dec: %Lf == %Lf", result, expected);
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_ha() {
@@ -136,20 +130,13 @@ void test_ha() {
     long double result = ha(355, altitude, latitude, dec);
     long double expected = 23.1342075;
 
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_ha: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_ha: %Lf == %Lf", result, expected);
+    ASSERT_EQUALS_LD(result, expected);
 
     result = ha(3, altitude, latitude, dec);
     expected = 336.865792;
 
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_ha: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_ha: %Lf == %Lf", result, expected);
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_ra() {
@@ -158,11 +145,8 @@ void test_ra() {
     long double result = ra(lst, ha);
     long double expected = 12.87444367;
 
-    if (!assertEqualsl(result, expected)) {
-        log("ERROR test_ra: %Lf != %Lf", result, expected);
-        exit(1);
-    }
-    log("SUCCESS test_ra: %Lf == %Lf", result, expected);
+    ASSERT_EQUALS_LD(result, expected);
+    SUCCESS();
 }
 
 void test_deg_mins_secs() {
@@ -170,41 +154,26 @@ void test_deg_mins_secs() {
     memset(&out, 0, sizeof(struct dec_mins_secs));
     to_dms(71.20088889, &out);
 
-    if (!assertEquals(71, out.base)) {
-        log("ERROR test_dec_deg_mins_secs: degs %d != %d", 71, out.base);
-        exit(1);
-    }
-    if (!assertEquals(12, out.minutes)) {
-        log("ERROR test_dec_deg_mins_secs: mins %d != %d", 12, out.minutes);
-        exit(1);
-    }
-    if (!assertEquals(3, out.seconds)) {
-        log("ERROR test_dec_deg_mins_secs: secs %d != %d", 3, out.seconds);
-        exit(1);
-    }
-    log("SUCCESS test_dec_deg_mins_secs");
+    ASSERT_EQUALS(71, out.base);
+    ASSERT_EQUALS(12, out.minutes);
+    ASSERT_EQUALS(3, out.seconds);
+    SUCCESS();
 }
 
 void test_response_ra() {
     char response[35];
     char *expected = "12:52:27#";
     response_ra(response, 12.87444367);
-    if (!assertEqualsStr(response, expected)) {
-        log("ERROR test_response_ra: %s != %s", response, expected);
-        exit(1);
-    }
-    log("SUCCESS test_response_ra: %s == %s", response, expected);
+    ASSERT_EQUALS_STR(response, expected);
+    SUCCESS();
 }
 
 void test_response_dec() {
     char response[35];
     char *expected = "+10*28#";
     response_dec(response, 10.46797995);
-    if (!assertEqualsStr(response, expected)) {
-        log("ERROR test_response_dec: %s != %s", response, expected);
-        exit(1);
-    }
-    log("SUCCESS test_response_dec: %s == %s", response, expected);
+    ASSERT_EQUALS_STR(response, expected);
+    SUCCESS();
 }
 
 void test_process_request() {
@@ -232,64 +201,66 @@ void test_process_request() {
     loc.latitude = 42.78842222;
     loc.longitude = 71.20088889;
 
-    char *request_ra = "#:GR#";
-    char *expected_ra_response = "12:52:27#";
-
-    char response_buffer[35];
-    memset(response_buffer, 0, 32);
-    protocol_handle_request(request_ra, response_buffer, &loc);
-    if (!assertEqualsStr(response_buffer, expected_ra_response)) {
-        log("ERROR test_process_request ra: %s != %s", response_buffer, expected_ra_response);
-        //exit(1);
-    } else {
-        log("SUCCESS test_process_request ra: %s == %s", response_buffer, expected_ra_response);
+    {
+        char *command = "#:GR#";
+        char *expected = "12:52:27#";
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
     }
 
-    memset(response_buffer, 0, 32);
-    char *request_dec = "#:GD#";
-    char *expected_dec_response = "+10*28#";
-    protocol_handle_request(request_dec, response_buffer, &loc);
-    if (!assertEqualsStr(response_buffer, expected_dec_response)) {
-        log("ERROR test_process_request dec: %s != %s", response_buffer, expected_dec_response);
-        //exit(1);
-    } else {
-        log("SUCCESS test_process_request dec: %s == %s", response_buffer, expected_dec_response);
+    {
+        char *command = "#:GD#";
+        char *expected = "+10*28#";
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
     }
 
-    memset(response_buffer, 0, 32);
-    char *request_bla = ":BLA#";
-    char *expected_bla_response = "\0x15";
-    protocol_handle_request(request_bla, response_buffer, &loc);
-    if (!assertEqualsStr(response_buffer, expected_bla_response)) {
-        log("ERROR test_process_request bla: %s != %s", response_buffer, expected_bla_response);
-        //exit(1);
-    } else {
-        log("SUCCESS test_process_request bla: %s == %s", response_buffer, expected_bla_response);
+    {
+        char *command = ":BLA#";
+        char expected[5];
+        sprintf(expected,"%c", 21);
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
     }
 
-    memset(response_buffer, 0, 32);
-    char *request_sync = "#:Q#:Sr01:37:26#";
-    char *expected_sync_response = "1";
-    protocol_handle_request(request_sync, response_buffer, &loc);
-    if (!assertEqualsStr(response_buffer, expected_sync_response)) {
-        log("ERROR test_process_request sync ra: %s != %s", response_buffer, expected_sync_response);
-        //exit(1);
-    } else {
-        log("SUCCESS test_process_request sync ra: %s == %s", response_buffer, expected_sync_response);
+    {
+        char *command = "#:Q#:Sr01:37:26#";
+        char *expected = "1";
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
     }
 
-    memset(response_buffer, 0, 32);
-    char *request_sync_dec = ":Sd+72�06:40#";
-    protocol_handle_request(request_sync_dec, response_buffer, &loc);
-    if (!assertEqualsStr(response_buffer, expected_sync_response)) {
-        log("ERROR test_process_request sync dec: %s != %s", response_buffer, expected_sync_response);
-        //exit(1);
-    } else {
-        log("SUCCESS test_process_request sync dec: %s == %s", response_buffer, expected_sync_response);
+    {
+        char *command = ":Sd+72�06:40#";
+        char *expected = "1";
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
     }
+
+    {
+        char *command = ":Sd+72�06:40#";
+        char *expected = "1";
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
+    }
+
+    {
+        char *command = ":CM#";
+        char *expected= "Polaris #";
+        char response[35];
+        protocol_handle_request(command, response, &loc);
+        ASSERT_EQUALS_STR(expected, response);
+    }
+    SUCCESS();
 }
 
-int main(int argc, char **argv) {
+int main() {
     test_to_dms();
     test_from_dms();
     test_jd();

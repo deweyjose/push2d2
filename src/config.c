@@ -74,11 +74,11 @@ int config_load(struct config *config, char *filename) {
     cfg_t *serial_cfg = cfg_getsec(cfg, "serial");
 
     char *tmpDevice = cfg_getstr(serial_cfg, "device");
-    int str_len = strlen(tmpDevice) + 1;
+    unsigned int str_len = strlen(tmpDevice) + 1;
     config->serial.device = (char *) malloc(str_len);
     strcpy(config->serial.device, tmpDevice);
 
-    config->serial.baud_rate = cfg_getint(serial_cfg, "baud_rate");
+    config->serial.baud_rate = (short)cfg_getint(serial_cfg, "baud_rate");
 
     // map the options into the configuration struct
 
@@ -101,7 +101,7 @@ int config_load(struct config *config, char *filename) {
     dcgi(d6_pin);
     dcgi(d7_pin);
 
-    int rotarySections = cfg_size(cfg, "rotary");
+    unsigned int rotarySections = cfg_size(cfg, "rotary");
     if (rotarySections != 2) {
         log("found %d rotary sections 2 required", rotarySections);
         return 0;

@@ -29,16 +29,6 @@ long double decimal_hours(struct tm *tm_ptr) {
 }
 
 /**
- * Helper function. This is called by core p2d2.
- * @return
- */
-long double jd() {
-    time_t t = time(NULL);
-    struct tm *tm_ptr = localtime(&t);
-    return jd_from_time_t(tm_ptr);
-}
-
-/**
  * Calculate julian date based on a tm.
  * Refactored to make unit tests easier.
  * @param tm_ptr
@@ -141,7 +131,7 @@ long double ra(long double lst, long double ha) {
 }
 
 /**
- * Compute decimal base, mins secs.
+ * Compute decimal base, minutes secs.
  * @param deg
  * @param ddms
  * @return
@@ -150,7 +140,7 @@ struct dec_mins_secs * to_dms(long double deg, struct dec_mins_secs * out) {
     out->base = TRUNC(deg);
     long double minutes = (deg - out->base) * 60;
     out->minutes = TRUNC(minutes);
-    out->seconds = (minutes - out->minutes) * 60;
+    out->seconds = (short)((minutes - (long double)out->minutes) * 60);
     return out;
 }
 

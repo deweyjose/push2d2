@@ -4,7 +4,6 @@
 
 #include <stdio.h>
 #include <lcd.h>
-#include <unistd.h>
 #include "include/display.h"
 #include "include/config.h"
 
@@ -15,7 +14,7 @@ int lcd = 0;
 int display_initialize(const struct config *s) {
     log("initializing");
 
-    short mode4 = s->display_config.bit_mode == 4;
+    int mode4 = s->display_config.bit_mode == 4;
     lcd = lcdInit(
             s->display_config.rows,
             s->display_config.columns,
