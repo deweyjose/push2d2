@@ -1,10 +1,10 @@
 //
 // Created by Dewey Jose on 5/21/22.
 //
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <memory.h>
-#include <stdlib.h>
 #include <calc.h>
 #include <protocol.h>
 #include <config.h>
@@ -14,31 +14,22 @@
 #define log(format, ...) printf("TEST: " format "\n" , ##__VA_ARGS__)
 #define EPSILON 0.00001
 
-int assertEqualsLD(long double l, long double r) {
-    return fabsl(l - r) < EPSILON;
-}
-
-int assertEquals(long l, long r) {
-    return l == r;
-}
-
-int assertEqualsStr(char *l, char *r) {
-    return strcmp(l, r) == 0;
-}
-
 #define ASSERT_EQUALS(expected, actual) \
-if (!assertEquals(expected, actual)) { \
+if (expected != actual) { \
     log("ERROR %s: %d != %d", __FUNCTION__ , expected, actual); \
+    exit(1);                                    \
 } \
 
 #define ASSERT_EQUALS_LD(expected, actual) \
-if (!assertEqualsLD(expected, actual)) { \
+if (fabsl(expected - actual) > EPSILON) { \
     log("ERROR %s: %Lf != %Lf", __FUNCTION__ , expected, actual); \
+    exit(1);                                    \
 }                                         \
 
 #define ASSERT_EQUALS_STR(expected, actual) \
-if (!assertEqualsStr(expected, actual)) { \
+if (strcmp(expected, actual) != 0) { \
     log("ERROR %s: %s != %s", __FUNCTION__ , expected, actual); \
+    exit(1);                                    \
 }                                         \
 
 #define SUCCESS() log("SUCCESS %s", __FUNCTION__)
@@ -176,87 +167,92 @@ void test_response_dec() {
     SUCCESS();
 }
 
+void test_ra_command(struct coordinates *loc) {
+    char *command = "#:GR#";
+    char *expected = "12:53:03#";
+    char response[35];
+    protocol_handle_request(command, response, loc);
+    ASSERT_EQUALS_STR(expected, response);
+    SUCCESS();
+}
+
+void test_dec_command(struct coordinates *loc) {
+    char *command = "#:GD#";
+    char *expected = "+87*40#";
+    char response[35];
+    protocol_handle_request(command, response, loc);
+    ASSERT_EQUALS_STR(expected, response);
+    SUCCESS();
+}
+
+void test_bad_command(struct coordinates *loc) {
+    char *command = ":BLA#";
+    char expected[5];
+    sprintf(expected, "%c", 21);
+    char response[35];
+    protocol_handle_request(command, response, loc);
+    ASSERT_EQUALS_STR(expected, response);
+    SUCCESS();
+}
+
+void test_sync_ra_command(struct coordinates *loc) {
+    char *command = "#:Q#:Sr01:37:26#";
+    char *expected = "1";
+    char response[35];
+    protocol_handle_request(command, response, loc);
+    ASSERT_EQUALS_STR(expected, response);
+    SUCCESS();
+}
+
+void test_sync_dec_command(struct coordinates *loc) {
+    char *command = ":Sd+72�06:40#";
+    char *expected = "1";
+    char response[35];
+    protocol_handle_request(command, response, loc);
+    ASSERT_EQUALS_STR(expected, response);
+    SUCCESS();
+}
+
+void test_sync_commit_command(struct coordinates *loc) {
+    char *command = ":CM#";
+    char *expected = "Polaris #";
+    char response[35];
+    protocol_handle_request(command, response, loc);
+    ASSERT_EQUALS_STR(expected, response);
+    SUCCESS();
+}
+
 void test_process_request() {
 
     wiringPiSetup();
 
     struct config c;
-    c.azimuth_config.gear_ratio=20;
-    c.azimuth_config.cpr=2400;
-    c.azimuth_config.phase_b_pin=6;
-    c.azimuth_config.phase_a_pin=7;
-    c.altitude_config.gear_ratio=20;
-    c.altitude_config.cpr=2400;
-    c.altitude_config.phase_a_pin=8;
-    c.altitude_config.phase_b_pin=9;
+    c.azimuth_config.gear_ratio = 20;
+    c.azimuth_config.cpr = 2400;
+    c.azimuth_config.phase_b_pin = 6;
+    c.azimuth_config.phase_a_pin = 7;
+    c.altitude_config.gear_ratio = 20;
+    c.altitude_config.cpr = 2400;
+    c.altitude_config.phase_a_pin = 8;
+    c.altitude_config.phase_b_pin = 9;
 
+    struct coordinates loc;
+    loc.latitude = 42.78842222;
+    loc.longitude = 71.20088889;
+
+    set_test_time(1654351516);
     rotary_initialize(&c);
     rotary_set_altitude(45);
     rotary_set_azimuth(1);
 
     protocol_initialize();
 
-    struct coordinates loc;
-    memset(&loc, 0, sizeof(struct coordinates));
-    loc.latitude = 42.78842222;
-    loc.longitude = 71.20088889;
-
-    {
-        char *command = "#:GR#";
-        char *expected = "12:52:27#";
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
-
-    {
-        char *command = "#:GD#";
-        char *expected = "+10*28#";
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
-
-    {
-        char *command = ":BLA#";
-        char expected[5];
-        sprintf(expected,"%c", 21);
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
-
-    {
-        char *command = "#:Q#:Sr01:37:26#";
-        char *expected = "1";
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
-
-    {
-        char *command = ":Sd+72�06:40#";
-        char *expected = "1";
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
-
-    {
-        char *command = ":Sd+72�06:40#";
-        char *expected = "1";
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
-
-    {
-        char *command = ":CM#";
-        char *expected= "Polaris #";
-        char response[35];
-        protocol_handle_request(command, response, &loc);
-        ASSERT_EQUALS_STR(expected, response);
-    }
+    test_ra_command(&loc);
+    test_dec_command(&loc);
+    test_bad_command(&loc);
+    test_sync_ra_command(&loc);
+    test_sync_dec_command(&loc);
+    test_sync_commit_command(&loc);
     SUCCESS();
 }
 
