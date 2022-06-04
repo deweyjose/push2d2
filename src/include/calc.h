@@ -58,4 +58,6 @@ struct dec_mins_secs * to_dms(long double deg, struct dec_mins_secs * out);
 
 long double from_dms(struct dec_mins_secs *input);
 
+void set_test_time(time_t time);
+
 #endif //PUSH2D2_CALC_H

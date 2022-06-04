@@ -50,8 +50,19 @@ long double jd_from_time_t(struct tm *tm_ptr) {
     return JD;
 }
 
-long double gst() {
+time_t test_time = NULL;
+
+void set_test_time(time_t time) {
+    test_time = time;
+}
+
+time_t get_time() {
     time_t t = time(NULL);
+    return test_time ? test_time : time(NULL);
+}
+
+long double gst() {
+    time_t t = get_time();
     struct tm *tm_ptr = localtime(&t);
     return gst_from_jd_tm(jd_from_time_t(tm_ptr), tm_ptr);
 }
