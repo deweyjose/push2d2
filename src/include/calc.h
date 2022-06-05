@@ -6,6 +6,7 @@
 #define PUSH2D2_CALC_H
 
 #include <time.h>
+#include <config.h>
 
 #define TRUNC(x) ((int)(x))
 
@@ -14,7 +15,8 @@
 #define JD_CONSTANT 1720994.5
 
 long double jd();
-long double jd_from_time_t(struct tm * tm_ptr);
+
+long double jd_from_time_t(struct tm *tm_ptr);
 
 // Greenwich Sidereal Time
 #define GST_JD_EPOCH 2451545.5
@@ -25,6 +27,12 @@ long double jd_from_time_t(struct tm * tm_ptr);
 #define GST_UTC1 1.002737909
 
 // Greenwich Sidereal Time
+
+struct azimuth_altitude {
+    long double azimuth;
+    long double altitude;
+};
+typedef struct azimuth_altitude *azimuth_altitude_ptr;
 
 long double gst();
 
@@ -46,6 +54,19 @@ long double ha(long double azimuth, long double altitude, long double latitude, 
 
 long double ra(long double lst, long double ha);
 
+// Altitude
+
+azimuth_altitude_ptr compute_az_and_alt(
+        long double ra,
+        long double dec,
+        coordinates_ptr location,
+        azimuth_altitude_ptr out
+);
+
+// Azimuth
+
+long double az(long double dec, long double ra);
+
 // decimal base minutes seconds
 
 struct dec_mins_secs {
@@ -54,7 +75,7 @@ struct dec_mins_secs {
     short seconds;
 };
 
-struct dec_mins_secs * to_dms(long double deg, struct dec_mins_secs * out);
+struct dec_mins_secs *to_dms(long double deg, struct dec_mins_secs *out);
 
 long double from_dms(struct dec_mins_secs *input);
 

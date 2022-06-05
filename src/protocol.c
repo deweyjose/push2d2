@@ -8,7 +8,6 @@
 #include <protocol.h>
 #include <rotary.h>
 #include <regex.h>
-#include <math.h>
 
 #define log(format, ...) printf("PROTOCOL: " format "\n" , ##__VA_ARGS__)
 
@@ -18,7 +17,7 @@
 #define COMMAND_SYNC_DEC_REGEX ":Sd[\\+\\-]+[0-9]+[^\\x00-\\x7F]*[0-9]+:[0-9]+\\#"
 #define COMMAND_CM ":CM#"
 #define SYNC_RA_FORMAT "#:Q#:Sr%02hu:%hu:%hu#"
-#define SYNC_DEC_FORMAT ":Sd%c%02hi%c%c%c%02hi:%02hi#"
+#define SYNC_DEC_FORMAT ":Sd%c%02hi%c%02hi:%02hi#"
 
 regex_t regex_sync_ra;
 regex_t regex_sync_dec;
@@ -88,7 +87,7 @@ char *response_dec(char *buffer, long double dec) {
  * @param location
  * @return
  */
-char *protocol_handle_request(char *input, char *output, struct coordinates *location) {
+char *protocol_handle_request(char *input, char *output, coordinates_ptr location) {
     if (strcmp(COMMAND_DEC, input) == 0) {
         long double altitude = rotary_get_altitude();
         long double azimuth = rotary_get_azimuth();
@@ -113,14 +112,14 @@ char *protocol_handle_request(char *input, char *output, struct coordinates *loc
         ra_dms.seconds = seconds;
         last_ra_sync = from_dms(&ra_dms);
 
-        log("accept RA %Lf", last_ra_sync);
+        log("accept sync RA %Lf", last_ra_sync);
 
         sprintf(output, "1");
         return output;
     } else if (!regexec(&regex_sync_dec, input, 0, NULL, 0)) {
-        char sign, c1, c2, c3 = 0;
+        char sign, c1 = 0;
         short degrees, minutes, seconds = 0;
-        sscanf(input, SYNC_DEC_FORMAT, &sign, &degrees, &c1, &c2, &c3, &minutes, &seconds);
+        sscanf(input, SYNC_DEC_FORMAT, &sign, &degrees, &c1, &minutes, &seconds);
 
         struct dec_mins_secs dec_dms;
         dec_dms.base = degrees;
@@ -128,48 +127,20 @@ char *protocol_handle_request(char *input, char *output, struct coordinates *loc
         dec_dms.seconds = seconds;
         last_dec_sync = from_dms(&dec_dms);
 
-        log("accept DEC %Lf", last_dec_sync);
+        log("accept sync DEC %Lf", last_dec_sync);
 
         sprintf(output, "1");
 
         return output;
     } else if (strcmp(COMMAND_CM, input) == 0) {
-        // altitude
-        // get LST
-        long double greenwich_sidereal_time = gst();
-        long double local_sidereal_time = lst(greenwich_sidereal_time, location->longitude);
 
-        long double hour_angle = local_sidereal_time - last_ra_sync;
-        if (hour_angle < 0) {
-            hour_angle += 24;
-        }
+        struct azimuth_altitude out;
+        compute_az_and_alt(last_ra_sync, last_dec_sync, location, &out);
 
-        // get hour angle in degrees
-        hour_angle *= 15;
+        rotary_set_altitude(out.altitude);
+        rotary_set_azimuth(out.azimuth);
 
-        long double sin_lat = sinl(location->latitude);
-        long double sin_dec = sinl(last_dec_sync);
-        long double cos_lat = cosl(location->latitude);
-        long double sin_a = (sin_dec * sin_lat)
-                            + (cosl(last_dec_sync) * cos_lat * cosl(hour_angle));
-
-        long double altitude = asinl(sin_a);
-
-        // azimuth
-        long double cos_az = (sin_dec - (sin_lat * sin_a)) / (cos_lat * cosl(altitude));
-
-        long double azimuth = acosl(cos_az);
-
-        long double sin_ha = sinl(hour_angle);
-
-        if (sin_ha > 0) {
-            azimuth = 360.0 - azimuth;
-        }
-
-        rotary_set_altitude(altitude);
-        rotary_set_azimuth(azimuth);
-
-        log("commit a: %Lf, A: %Lf", altitude, azimuth);
+        log("commit a: %Lf, A: %Lf", out.altitude, out.azimuth);
 
         sprintf(output, "Polaris #");
 

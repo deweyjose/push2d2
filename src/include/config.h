@@ -14,6 +14,7 @@ struct coordinates {
     long double latitude;
     long double longitude;
 };
+typedef struct coordinates * coordinates_ptr;
 
 struct display_config {
     short rows;

@@ -5,6 +5,7 @@
 // By Peter Duffett-Smith, Jonathan Zwart
 //
 
+#include <stdio.h>
 #include <math.h>
 #include <calc.h>
 
@@ -57,7 +58,6 @@ void set_test_time(time_t time) {
 }
 
 time_t get_time() {
-    time_t t = time(NULL);
     return test_time ? test_time : time(NULL);
 }
 
@@ -90,7 +90,7 @@ long double gst_from_jd_tm(long double jd, struct tm *tm_ptr) {
 long double lst(long double gst, long double longitude) {
     long double longHours = longitude / 15;
     long double lst = gst + longHours;
-    return lst - (24 * TRUNC(lst/24));
+    return lst - (24 * TRUNC(lst / 24));
 }
 
 /**
@@ -123,7 +123,7 @@ long double ha(long double azimuth, long double altitude, long double latitude, 
     long double cosHA = (sinl(rAltitude) - (sinl(rLatitude) * sinl(rDec))) / (cosl(rLatitude) * cosl(rDec));
     long double acosHA = acosl(cosHA);
     long double HA = deg(acosHA);
-    if (sinl(rad(azimuth)) < 0){
+    if (sinl(rad(azimuth)) < 0) {
         return HA;
     } else {
         return 360.0 - HA;
@@ -141,22 +141,67 @@ long double ra(long double lst, long double ha) {
     return ra > 0 ? ra : ra + 24;
 }
 
+azimuth_altitude_ptr compute_az_and_alt(
+        long double ra,
+        long double dec,
+        coordinates_ptr location,
+        azimuth_altitude_ptr out
+) {
+    long double greenwich_sidereal_time = gst();
+    long double local_sidereal_time = lst(greenwich_sidereal_time, location->longitude);
+
+    long double hour_angle = local_sidereal_time - ra;
+
+    if (hour_angle < 0) {
+        hour_angle += 24;
+    }
+
+    if(hour_angle < 0) {
+        log("ERROR hour angle < 0 %Lf", hour_angle);
+    }
+
+    hour_angle *= 15;
+
+    long double rad_ha = rad(hour_angle);
+    long double sin_lat = sinl(rad(location->latitude));
+    long double sin_dec = sinl(rad(dec));
+    long double cos_lat = cosl(rad(location->latitude));
+    long double cos_dec = cosl(rad(dec));
+    long double cos_ha = cosl(rad_ha);
+    long double sin_a = (sin_dec * sin_lat) + (cos_dec * cos_lat * cos_ha);
+
+    out->altitude = deg(asinl(sin_a));
+
+    long double cos_a = cosl(rad(out->altitude));
+    long double cos_az = (sin_dec - (sin_lat * sin_a)) / (cos_lat * cos_a);
+    long double azimuth = deg(acosl(cos_az));
+
+    long double sin_ha = sinl(rad_ha);
+    if (sin_ha > 0) {
+        azimuth = 360.0 - azimuth;
+    }
+
+    out->azimuth = azimuth;
+
+    return  out;
+}
+
 /**
  * Compute decimal base, minutes secs.
  * @param deg
  * @param ddms
  * @return
  */
-struct dec_mins_secs * to_dms(long double deg, struct dec_mins_secs * out) {
+struct dec_mins_secs *to_dms(long double deg, struct dec_mins_secs *out) {
     out->base = TRUNC(deg);
     long double minutes = (deg - out->base) * 60;
     out->minutes = TRUNC(minutes);
-    out->seconds = (short)((minutes - (long double)out->minutes) * 60);
+    out->seconds = (short) ((minutes - (long double) out->minutes) * 60);
     return out;
 }
 
-long double from_dms(struct dec_mins_secs * input) {
-    long double seconds = (long double)input->seconds / 60;
-    long double minutes = (long double)input->minutes + seconds;
-    return (long double)input->base + (minutes/60);
+long double from_dms(struct dec_mins_secs *input) {
+    long double seconds = (long double) input->seconds / 60;
+    long double minutes = (long double) input->minutes + seconds;
+    return (long double) input->base + (minutes / 60);
 }
