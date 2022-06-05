@@ -9,9 +9,9 @@
 
 int serial_initialize(struct serial * config);
 
-int serial_read(char *output);
+int serial_read_command(char *output);
 
-void serial_write(char *data);
+void serial_write_response(char *data);
 
 #endif //P2D2_SERIAL_H
 

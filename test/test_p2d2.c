@@ -169,7 +169,7 @@ void test_response_dec() {
 
 void test_ra_command(struct coordinates *loc) {
     char *command = "#:GR#";
-    char *expected = "12:53:03#";
+    char *expected = "03:23:26#";
     char response[35];
     protocol_handle_request(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
@@ -222,6 +222,22 @@ void test_sync_commit_command(struct coordinates *loc) {
     SUCCESS();
 }
 
+void test_az_alt_conversion(struct coordinates *loc) {
+    set_test_time(1654451483);
+
+    char * ra = "#:Q#:Sr12:55:02#";
+    char * dec = ":Sd+55*50:37#";
+    char response[35];
+    protocol_handle_request(ra, response, loc);
+    protocol_handle_request(dec, response, loc);
+    protocol_handle_request(":CM#", response, loc);
+
+    ASSERT_EQUALS_LD(38.377500, rotary_get_azimuth()); // align on our boundary, slightly lossy
+    ASSERT_EQUALS_LD(28.117500, rotary_get_altitude());
+    SUCCESS();
+}
+
+
 void test_process_request() {
 
     wiringPiSetup();
@@ -238,7 +254,7 @@ void test_process_request() {
 
     struct coordinates loc;
     loc.latitude = 42.78842222;
-    loc.longitude = 71.20088889;
+    loc.longitude = -71.20088889;
 
     set_test_time(1654351516);
     rotary_initialize(&c);
@@ -253,10 +269,35 @@ void test_process_request() {
     test_sync_ra_command(&loc);
     test_sync_dec_command(&loc);
     test_sync_commit_command(&loc);
+    test_az_alt_conversion(&loc);
+    SUCCESS();
+}
+
+void test_compute_az_and_alt() {
+    struct azimuth_altitude out;
+
+    struct dec_mins_secs ra;
+    ra.base = 12; ra.minutes = 55; ra.seconds = 2;
+    long double ra_dec = from_dms(&ra);
+
+    struct dec_mins_secs dec;
+    dec.base= 55; dec.minutes = 50; dec.seconds = 37;
+    long double dec_dec = from_dms(&dec);
+
+    struct coordinates loc;
+    loc.latitude = 42.78842222;
+    loc.longitude = -71.20088889;
+
+    set_test_time(1654451483);
+    compute_az_and_alt(ra_dec, dec_dec, &loc, &out);
+
+    ASSERT_EQUALS_LD(38.384030, out.azimuth)
+    ASSERT_EQUALS_LD(28.118535, out.altitude);
     SUCCESS();
 }
 
 int main() {
+
     test_to_dms();
     test_from_dms();
     test_jd();
@@ -266,6 +307,7 @@ int main() {
     test_ha();
     test_ra();
     test_deg_mins_secs();
+    test_compute_az_and_alt();
     test_response_ra();
     test_response_dec();
     test_process_request();

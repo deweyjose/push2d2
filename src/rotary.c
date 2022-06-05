@@ -82,12 +82,14 @@ int rotary_initialize(const struct config *config) {
     --azimuth_encoder.max_encoded;
     azimuth_encoder.max_reset = 0;
     azimuth_encoder.min_reset = azimuth_encoder.max_encoded;
+    azimuth_encoder.encoder_count = 1;
 
     altitude_encoder.max_encoded= (altitude_encoder.config->cpr * altitude_encoder.config->gear_ratio);
     altitude_encoder.degrees_per_encoded = DEGREES / altitude_encoder.max_encoded;
     --altitude_encoder.max_encoded;
     altitude_encoder.max_reset = altitude_encoder.max_encoded;
     altitude_encoder.min_reset = 0;
+    altitude_encoder.encoder_count = 1;
 
     return 1;
 }

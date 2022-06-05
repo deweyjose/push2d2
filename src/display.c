@@ -4,8 +4,8 @@
 
 #include <stdio.h>
 #include <lcd.h>
-#include "include/display.h"
-#include "include/config.h"
+#include <display.h>
+#include <config.h>
 
 #define log(format, ...) printf("DISPLAY: " format "\n" , ##__VA_ARGS__)
 

@@ -5,35 +5,44 @@
 #include <stdio.h>
 #include <serial.h>
 #include <wiringSerial.h>
+#include <string.h>
 
 #define log(format, ...) printf("SERIAL: " format "\n" , ##__VA_ARGS__)
 
-int serial = 0;
+int handle = 0;
+int buffer_position = 0;
+char buffer[64];
 
 int serial_initialize(struct serial *config) {
-    serial = serialOpen(config->device, config->baud_rate);
-    if (serial == -1) {
+    handle = serialOpen(config->device, config->baud_rate);
+    if (handle == -1) {
         log("failed to initialize serial device %s, baud rate %d", config->device, config->baud_rate);
         return 0;
     }
     return 1;
 }
 
-void serial_write(char *data) {
-    //log("serial write: %s", data);
-    serialPuts(serial, data);
+void serial_write_response(char *data) {
+    serialPuts(handle, data);
 
 }
 
-int serial_read(char * output) {
-    int available = serialDataAvail(serial);
+int serial_read_command(char *output) {
+    int available = serialDataAvail(handle);
     if (available > 0) {
+        char last_char = 0;
         for (int i = 0; i < available; ++i) {
-            output[i] = (char) serialGetchar(serial);
+            last_char = (char) serialGetchar(handle);
+            buffer[buffer_position++] = last_char;
         }
-        output[available] = '\0';
-        log("serial read: %s", output);
+
+        if (last_char == '#') {
+            buffer[buffer_position] = '\0';
+            strcpy(output, buffer);
+            buffer_position = 0;
+            return 1;
+        }
     }
-    return available;
+    return 0;
 }
 

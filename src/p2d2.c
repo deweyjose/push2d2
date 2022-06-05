@@ -12,9 +12,12 @@
 #include <config.h>
 #include <calc.h>
 #include <serial.h>
-#include "protocol.h"
+#include <protocol.h>
+#include <stdlib.h>
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
+
+const int RAND_DIV = RAND_MAX / 10;
 
 int main(int argc, char *argv[]) {
     log("Push2D2 version %d.%d", P2D2_VERSION_MAJOR, P2D2_MINOR);
@@ -55,22 +58,25 @@ int main(int argc, char *argv[]) {
 
     fflush(stdout);
 
+
     while (1) {
         char request[32];
-        if (serial_read(request)) {
+        if (serial_read_command(request)) {
             char response[32];
             protocol_handle_request(request, response, &config.coordinates);
-            serial_write(response);
+            serial_write_response(response);
         }
 
-        display_clear();
-        char buffer[16];
-        sprintf(buffer, "A  %Lf", rotary_get_altitude());
-        display_text(buffer, 0);
-        sprintf(buffer, "AZ %Lf", rotary_get_azimuth());
-        display_text(buffer, 1);
-        usleep(100000);
+        if ((rand()/RAND_DIV) == 3) {
+            display_clear();
+            char buffer[16];
+            sprintf(buffer, "A  %Lf", rotary_get_altitude());
+            display_text(buffer, 0);
+            sprintf(buffer, "AZ %Lf", rotary_get_azimuth());
+            display_text(buffer, 1);
+            fflush(stdout);
+        }
 
-        fflush(stdout);
+        usleep(50000);
     }
 }

@@ -5,7 +5,7 @@
 #ifndef P2D2_DISPLAY_H
 #define P2D2_DISPLAY_H
 
-#include "config.h"
+#include <config.h>
 
 int display_initialize(const struct config *s);
 
