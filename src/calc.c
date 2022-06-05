@@ -51,11 +51,14 @@ long double jd_from_time_t(struct tm *tm_ptr) {
     return JD;
 }
 
+//
+// this should get #ifdef'ed out...
 time_t test_time = 0;
 
 void set_test_time(time_t time) {
     test_time = time;
 }
+//
 
 time_t get_time() {
     return test_time ? test_time : time(NULL);

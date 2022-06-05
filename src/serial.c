@@ -32,7 +32,6 @@ int serial_read(char * output) {
             output[i] = (char) serialGetchar(serial);
         }
         output[available] = '\0';
-        log("serial read: %s", output);
     }
     return available;
 }
