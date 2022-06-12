@@ -18,11 +18,11 @@ The project requires a few dependencies to be installed on the Raspberry PI.
 
 - [gcc](https://gcc.gnu.org/) compiler  
 - [cmake](https://cmake.org/) a build system for the build system
-- [WiringPi](https://github.com/WiringPi/WiringPi) an open source popular GPIO library for the Raspberry PI
+- [WiringPi](https://github.com/WiringPi/WiringPi) a popular open source GPIO library for the Raspberry PI
 - [libconfuse](https://github.com/libconfuse/libconfuse) an open source config file library
 - [gtest](https://google.github.io/googletest/quickstart-cmake.html) Google Test framework
 
-These commands are all thats needed to get the PI configured for development.
+PI Setup commands:
 ```console
 sudo apt-get install gcc
 sudo apt-get install cmake
