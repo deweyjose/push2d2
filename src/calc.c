@@ -204,11 +204,11 @@ long double ra(long double lst, long double ha) {
     return ra > 0 ? ra : ra + 24;
 }
 
-azimuth_altitude_ptr compute_az_and_alt(
+az_alt_ptr compute_az_and_alt(
         long double ra,
         long double dec,
         coordinates_ptr location,
-        azimuth_altitude_ptr out
+        az_alt_ptr out
 ) {
     long double greenwich_sidereal_time = gst();
     long double local_sidereal_time = lst(greenwich_sidereal_time, location->longitude);

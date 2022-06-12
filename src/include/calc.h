@@ -23,7 +23,7 @@ struct azimuth_altitude {
     long double azimuth;
     long double altitude;
 };
-typedef struct azimuth_altitude *azimuth_altitude_ptr;
+typedef struct azimuth_altitude *az_alt_ptr;
 
 struct degrees_mins_secs {
     short degrees;
@@ -46,11 +46,11 @@ long double ha(long double azimuth, long double altitude, long double latitude, 
 
 long double ra(long double lst, long double ha);
 
-azimuth_altitude_ptr compute_az_and_alt(
+az_alt_ptr compute_az_and_alt(
         long double ra,
         long double dec,
         coordinates_ptr location,
-        azimuth_altitude_ptr out
+        az_alt_ptr out
 );
 
 dms_ptr dms_to_decimal_hours(long double deg, dms_ptr out);
