@@ -3,6 +3,7 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 #include <calc.h>
 #include <protocol.h>
@@ -42,6 +43,12 @@ int initialize_regex(regex_t *regex, const char *pattern) {
     return 1;
 }
 
+/**
+ * Public initialization API. Ensure the regex's are valid.
+ * At some point move this to configuration.
+ * Command Matchers => Command Responders.
+ * @return
+ */
 int protocol_initialize() {
     if (!initialize_regex(&regex_sync_ra, COMMAND_SYNC_RA_REGEX)) {
         return 0;
@@ -60,10 +67,10 @@ int protocol_initialize() {
  * @return HH:MM:SS
  */
 char *response_ra(char *buffer, long double ra) {
-    struct dec_mins_secs out;
-    memset(&out, 0, sizeof(struct dec_mins_secs));
-    to_dms(ra, &out);
-    sprintf(buffer, "%02d:%02d:%02d#", out.base, out.minutes, out.seconds);
+    struct degrees_mins_secs out;
+    memset(&out, 0, sizeof(struct degrees_mins_secs));
+    dms_to_decimal_hours(ra, &out);
+    sprintf(buffer, "%02d:%02d:%02d#", out.degrees, out.minutes, out.seconds);
     return buffer;
 }
 
@@ -73,11 +80,19 @@ char *response_ra(char *buffer, long double ra) {
  * @return sDD*MM’SS
  */
 char *response_dec(char *buffer, long double dec) {
-    struct dec_mins_secs out;
-    memset(&out, 0, sizeof(struct dec_mins_secs));
-    to_dms(dec, &out);
-    sprintf(buffer, "+%02d*%02d#", out.base, out.minutes);
+    struct degrees_mins_secs out;
+    memset(&out, 0, sizeof(struct degrees_mins_secs));
+    dms_to_decimal_hours(dec, &out);
+
+    char decSign = dec < 0 ? '-' : '+';
+    sprintf(buffer, "%c%02d%c%02d:%02d#",
+            decSign,
+            abs(out.degrees),
+            223,
+            abs(out.minutes),
+            abs(out.seconds));
     return buffer;
+
 }
 
 /**
@@ -106,11 +121,11 @@ char *protocol_handle_request(char *input, char *output, coordinates_ptr locatio
         sscanf(input, SYNC_RA_FORMAT, &hours, &minutes, &seconds);
 
         // get RA in hour decimal
-        struct dec_mins_secs ra_dms;
-        ra_dms.base = hours;
+        struct degrees_mins_secs ra_dms;
+        ra_dms.degrees = hours;
         ra_dms.minutes = minutes;
         ra_dms.seconds = seconds;
-        last_ra_sync = from_dms(&ra_dms);
+        last_ra_sync = decimal_hours_from_dms(&ra_dms);
 
         log("accept sync RA %Lf", last_ra_sync);
 
@@ -121,11 +136,11 @@ char *protocol_handle_request(char *input, char *output, coordinates_ptr locatio
         short degrees, minutes, seconds = 0;
         sscanf(input, SYNC_DEC_FORMAT, &sign, &degrees, &c1, &minutes, &seconds);
 
-        struct dec_mins_secs dec_dms;
-        dec_dms.base = degrees;
+        struct degrees_mins_secs dec_dms;
+        dec_dms.degrees = degrees;
         dec_dms.minutes = minutes;
         dec_dms.seconds = seconds;
-        last_dec_sync = from_dms(&dec_dms);
+        last_dec_sync = decimal_hours_from_dms(&dec_dms);
 
         log("accept sync DEC %Lf", last_dec_sync);
 
