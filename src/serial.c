@@ -5,14 +5,16 @@
 #include <stdio.h>
 #include <serial.h>
 #include <wiringSerial.h>
-#include <string.h>
 
 #define log(format, ...) printf("SERIAL: " format "\n" , ##__VA_ARGS__)
 
 int handle = 0;
-int buffer_position = 0;
-char buffer[64];
 
+/**
+ * Initialize the Serial library with settings from config;
+ * @param config
+ * @return 0|1
+ */
 int serial_initialize(struct serial *config) {
     handle = serialOpen(config->device, config->baud_rate);
     if (handle == -1) {
@@ -22,24 +24,35 @@ int serial_initialize(struct serial *config) {
     return 1;
 }
 
+/**
+ * Write data to the serial interface.
+ * @param data
+ */
 void serial_write_response(char *data) {
     serialPuts(handle, data);
 
 }
 
-int serial_read_command(char *output) {
+/**
+ * Read data from the serial interface into the buffer.
+ * This needs to be cleaned up further. The protocol
+ * layer should be the one to analyze the buffer for
+ * command control characters.
+ * @param buffer_ptr
+ * @return 0|1 if there is a command
+ */
+int serial_read_command(sb_ptr buffer_ptr) {
     int available = serialDataAvail(handle);
     if (available > 0) {
         char last_char = 0;
         for (int i = 0; i < available; ++i) {
             last_char = (char) serialGetchar(handle);
-            buffer[buffer_position++] = last_char;
+            buffer_ptr->buffer[buffer_ptr->current_position++] = last_char;
         }
 
         if (last_char == '#') {
-            buffer[buffer_position] = '\0';
-            strcpy(output, buffer);
-            buffer_position = 0;
+            buffer_ptr->buffer[buffer_ptr->current_position] = '\0';
+            buffer_ptr->current_position = 0;
             return 1;
         }
     }

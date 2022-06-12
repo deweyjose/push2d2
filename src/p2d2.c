@@ -58,12 +58,17 @@ int main(int argc, char *argv[]) {
 
     fflush(stdout);
 
+    char buffer[32];
+    struct serial_buffer sb;
+    sb.current_position = 0;
+    sb.length = 32;
+    sb.buffer = buffer;
 
     while (1) {
-        char request[32];
-        if (serial_read_command(request)) {
+
+        if (serial_read_command(&sb)) {
             char response[32];
-            protocol_handle_request(request, response, &config.coordinates);
+            protocol_handle_request(sb.buffer, response, &config.coordinates);
             serial_write_response(response);
         }
 
