@@ -58,11 +58,11 @@ int main(int argc, char *argv[]) {
 
     fflush(stdout);
 
-    char buffer[32];
+    char sb_buffer[32];
     struct serial_buffer sb;
     sb.current_position = 0;
     sb.length = 32;
-    sb.buffer = buffer;
+    sb.buffer = sb_buffer;
 
     while (1) {
 
