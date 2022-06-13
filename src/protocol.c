@@ -97,23 +97,23 @@ char *response_dec(char *buffer, long double dec) {
 
 /**
  * Process LX200 Meade Serial Command Set (some of them :)...)
- * @param input LX200 Meade Serial Command
- * @param output
+ * @param command LX200 Meade Serial Command
+ * @param response
  * @param location
  * @return
  */
-char *protocol_handle_request(char *input, char *output, coordinates_config_ptr location) {
-    if (strcmp(COMMAND_DEC, input) == 0) {
+char *protocol_dispatch(char *command, char *response, coordinates_config_ptr location) {
+    if (strcmp(COMMAND_DEC, command) == 0) {
         long double altitude = rotary_get_altitude();
         long double azimuth = rotary_get_azimuth();
-        return response_dec(output, dec(altitude, azimuth, location->latitude));
-    } else if (strcmp(COMMAND_RA, input) == 0) {
+        return response_dec(response, dec(altitude, azimuth, location->latitude));
+    } else if (strcmp(COMMAND_RA, command) == 0) {
         long double altitude = rotary_get_altitude();
         long double azimuth = rotary_get_azimuth();
-        return response_ra(output, ra(altitude, azimuth, location));
-    } else if (!regexec(&regex_sync_ra, input, 0, NULL, 0)) {
+        return response_ra(response, ra(altitude, azimuth, location));
+    } else if (!regexec(&regex_sync_ra, command, 0, NULL, 0)) {
         short hours, minutes, seconds = 0;
-        sscanf(input, SYNC_RA_FORMAT, &hours, &minutes, &seconds);
+        sscanf(command, SYNC_RA_FORMAT, &hours, &minutes, &seconds);
 
         // get RA in hour decimal
         struct degrees_mins_secs ra_dms;
@@ -124,12 +124,12 @@ char *protocol_handle_request(char *input, char *output, coordinates_config_ptr 
 
         log("accept sync RA %Lf", last_ra_sync);
 
-        sprintf(output, "1");
-        return output;
-    } else if (!regexec(&regex_sync_dec, input, 0, NULL, 0)) {
+        sprintf(response, "1");
+        return response;
+    } else if (!regexec(&regex_sync_dec, command, 0, NULL, 0)) {
         char sign, c1 = 0;
         short degrees, minutes, seconds = 0;
-        sscanf(input, SYNC_DEC_FORMAT, &sign, &degrees, &c1, &minutes, &seconds);
+        sscanf(command, SYNC_DEC_FORMAT, &sign, &degrees, &c1, &minutes, &seconds);
 
         struct degrees_mins_secs dec_dms;
         dec_dms.degrees = degrees;
@@ -139,10 +139,10 @@ char *protocol_handle_request(char *input, char *output, coordinates_config_ptr 
 
         log("accept sync DEC %Lf", last_dec_sync);
 
-        sprintf(output, "1");
+        sprintf(response, "1");
 
-        return output;
-    } else if (strcmp(COMMAND_CM, input) == 0) {
+        return response;
+    } else if (strcmp(COMMAND_CM, command) == 0) {
 
         struct azimuth_altitude out;
         compute_az_and_alt(last_ra_sync, last_dec_sync, location, &out);
@@ -152,12 +152,12 @@ char *protocol_handle_request(char *input, char *output, coordinates_config_ptr 
 
         log("commit a: %Lf, A: %Lf", out.altitude, out.azimuth);
 
-        sprintf(output, "Polaris #");
+        sprintf(response, "Polaris #");
 
-        return output;
+        return response;
     } else {
-        sprintf(output, "%c", 21);
-        return output;
+        sprintf(response, "%c", 21);
+        return response;
     }
 }
 

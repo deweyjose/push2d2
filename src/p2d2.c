@@ -17,7 +17,7 @@
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
-const int RAND_DIV = RAND_MAX / 10;
+const int RAND_DIV = RAND_MAX / 100;
 
 int main(int argc, char *argv[]) {
     log("Push2D2 version %d.%d", P2D2_VERSION_MAJOR, P2D2_MINOR);
@@ -61,15 +61,16 @@ int main(int argc, char *argv[]) {
     char sb_buffer[32];
     struct serial_buffer sb;
     sb.current_position = 0;
+    sb.stop_char= '#';
     sb.length = 32;
     sb.buffer = sb_buffer;
 
     while (1) {
-
         if (serial_read_command(&sb)) {
             char response[32];
-            protocol_handle_request(sb.buffer, response, &config.coordinates);
+            protocol_dispatch(sb.buffer, response, &config.coordinates);
             serial_write_response(response);
+            sb.current_position = 0;
         }
 
         if ((rand()/RAND_DIV) == 3) {
@@ -82,6 +83,6 @@ int main(int argc, char *argv[]) {
             fflush(stdout);
         }
 
-        usleep(50000);
+        usleep(1000);
     }
 }

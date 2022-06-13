@@ -10,6 +10,7 @@
 struct serial_buffer {
     int length;
     int current_position;
+    char stop_char;
     char * buffer;
 };
 typedef struct serial_buffer * sb_ptr;

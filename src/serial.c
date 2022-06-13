@@ -45,14 +45,15 @@ int serial_read_command(sb_ptr buffer_ptr) {
     int available = serialDataAvail(handle);
     if (available > 0) {
         char last_char = 0;
-        for (int i = 0; i < available; ++i) {
+        for (int i = 0; i < available && buffer_ptr->current_position < buffer_ptr->length; ++i) {
             last_char = (char) serialGetchar(handle);
             buffer_ptr->buffer[buffer_ptr->current_position++] = last_char;
         }
 
-        if (last_char == '#') {
+        if (last_char == buffer_ptr->stop_char) {
             buffer_ptr->buffer[buffer_ptr->current_position] = '\0';
-            buffer_ptr->current_position = 0;
+            return 1;
+        } else if (buffer_ptr->current_position == buffer_ptr->length) {
             return 1;
         }
     }

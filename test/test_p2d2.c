@@ -192,7 +192,7 @@ void test_ra_command(struct coordinates_config *loc) {
     char *command = "#:GR#";
     char *expected = "03:23:26#";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
@@ -202,7 +202,7 @@ void test_dec_command(struct coordinates_config *loc) {
     char expected[35];
     sprintf(expected, "+87%c40:28#", 223);
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
@@ -212,7 +212,7 @@ void test_bad_command(struct coordinates_config *loc) {
     char expected[5];
     sprintf(expected, "%c", 21);
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
@@ -221,7 +221,7 @@ void test_sync_ra_command(struct coordinates_config *loc) {
     char *command = "#:Q#:Sr01:37:26#";
     char *expected = "1";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
@@ -230,7 +230,7 @@ void test_sync_dec_command(struct coordinates_config *loc) {
     char *command = ":Sd+72�06:40#";
     char *expected = "1";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
@@ -239,7 +239,7 @@ void test_sync_commit_command(struct coordinates_config *loc) {
     char *command = ":CM#";
     char *expected = "Polaris #";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
@@ -250,9 +250,9 @@ void test_az_alt_conversion(struct coordinates_config *loc) {
     char * ra = "#:Q#:Sr12:55:02#";
     char * dec = ":Sd+55*50:37#";
     char response[35];
-    protocol_handle_request(ra, response, loc);
-    protocol_handle_request(dec, response, loc);
-    protocol_handle_request(":CM#", response, loc);
+    protocol_dispatch(ra, response, loc);
+    protocol_dispatch(dec, response, loc);
+    protocol_dispatch(":CM#", response, loc);
 
     ASSERT_EQUALS_LD(38.377500, rotary_get_azimuth()); // align on our boundary, slightly lossy
     ASSERT_EQUALS_LD(28.117500, rotary_get_altitude());
