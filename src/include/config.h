@@ -9,6 +9,7 @@ struct serial {
     char * device;
     short baud_rate;
 };
+typedef struct serial * serial_ptr;
 
 struct coordinates {
     long double latitude;
@@ -31,6 +32,7 @@ struct display_config {
     short d6_pin;
     short d7_pin;
 };
+typedef struct display_config * display_config_ptr;
 
 struct rotary_config {
     short phase_a_pin;
@@ -38,6 +40,7 @@ struct rotary_config {
     short cpr;
     short gear_ratio;
 };
+typedef struct rotary_config * rotary_config_ptr;
 
 struct config {
     struct serial serial;
@@ -46,6 +49,7 @@ struct config {
     struct rotary_config azimuth_config;
     struct rotary_config altitude_config;
 };
+typedef struct config * config_ptr;
 
 int config_load(struct config *config, char * filename);
 void config_dump(struct config *config);
