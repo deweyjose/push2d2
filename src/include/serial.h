@@ -7,9 +7,17 @@
 
 #include <config.h>
 
-int serial_initialize(struct serial * config);
+struct serial_buffer {
+    int length;
+    int current_position;
+    char stop_char;
+    char * buffer;
+};
+typedef struct serial_buffer * sb_ptr;
 
-int serial_read_command(char *output);
+int serial_initialize(serial_config_ptr config);
+
+int serial_read_command(sb_ptr buffer);
 
 void serial_write_response(char *data);
 

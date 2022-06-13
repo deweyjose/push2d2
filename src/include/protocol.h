@@ -9,7 +9,7 @@
 
 int protocol_initialize();
 
-char * protocol_handle_request(char * input, char * output, struct coordinates * location);
+char * protocol_dispatch(char * command, char * response, coordinates_config_ptr location);
 
 char * response_ra(char * buffer, long double ra);
 

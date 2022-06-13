@@ -18,7 +18,7 @@ if (wiringPiISR(axis ## _encoder.config->phase_##p ## _pin, INT_EDGE_BOTH, &rota
 } \
 
 struct rotary_info {
-    const struct rotary_config *config;
+    rotary_config_ptr config;
     volatile long encoder_count;
     volatile int last_encoded;
     volatile double degrees_per_encoded;
@@ -64,7 +64,7 @@ __attribute__((unused)) void rotary_altitude_callback() {
     rotary_read_pins(&altitude_encoder);
 }
 
-int rotary_initialize(const struct config *config) {
+int rotary_initialize(config_ptr config) {
     int size = sizeof(struct rotary_info);
     memset(&azimuth_encoder, 0, size);
     memset(&altitude_encoder, 0, size);

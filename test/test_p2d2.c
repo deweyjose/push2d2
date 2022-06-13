@@ -35,24 +35,39 @@ if (strcmp(expected, actual) != 0) { \
 #define SUCCESS() log("SUCCESS %s", __FUNCTION__)
 
 void test_to_dms() {
-    struct dec_mins_secs out;
-    to_dms(182.524167, &out);
-    ASSERT_EQUALS(182, out.base);
+    struct degrees_mins_secs out;
+    dms_to_decimal_hours(182.524167, &out);
+    ASSERT_EQUALS(182, out.degrees);
     ASSERT_EQUALS(31, out.minutes);
     ASSERT_EQUALS(27, out.seconds);
+
+    dms_to_decimal_hours(-182.524167, &out);
+    ASSERT_EQUALS(-182, out.degrees);
+    ASSERT_EQUALS(-31, out.minutes);
+    ASSERT_EQUALS(-27, out.seconds);
+
     SUCCESS();
 }
 
 void test_from_dms() {
-    struct dec_mins_secs input;
-    input.base = 182;
+    struct degrees_mins_secs input;
+    input.degrees = 182;
     input.minutes = 31;
     input.seconds = 27;
 
-    long double result = from_dms(&input);
+    long double result = decimal_hours_from_dms(&input);
     long double expected = 182.524167;
 
     ASSERT_EQUALS_LD(result, expected);
+
+    input.degrees = -182;
+    input.minutes = -31;
+    input.seconds = -27;
+
+    result = decimal_hours_from_dms(&input);
+    expected = -182.524167;
+    ASSERT_EQUALS_LD(result, expected);
+
     SUCCESS();
 }
 
@@ -66,7 +81,7 @@ void test_jd() {
     test_tm.tm_min = 32;
     test_tm.tm_sec = 57;
 
-    long double result = jd_from_time_t(&test_tm);
+    long double result = jd_from_tm(&test_tm);
     long double expected = 2459721.6478819;
 
     ASSERT_EQUALS_LD(result, expected);
@@ -83,7 +98,7 @@ void test_gst() {
     test_tm.tm_min = 32;
     test_tm.tm_sec = 57;
 
-    long double jd = jd_from_time_t(&test_tm);
+    long double jd = jd_from_tm(&test_tm);
     long double result = gst_from_jd_tm(jd, &test_tm);
     long double expected = 19.509501;
 
@@ -131,21 +146,26 @@ void test_ha() {
 }
 
 void test_ra() {
-    long double lst = 14.41672417;
-    long double ha = 1.5422805;
-    long double result = ra(lst, ha);
-    long double expected = 12.87444367;
+    long double altitude = 30.615;
+    long double azimuth = 365.7;
+    struct coordinates_config loc;
+    loc.latitude = 42.78842222;
+    loc.longitude = -71.20088889;
+    set_test_time(1654451483);
+
+    long double result = ra(altitude, azimuth, &loc);
+    long double expected = 16.578842;
 
     ASSERT_EQUALS_LD(result, expected);
     SUCCESS();
 }
 
 void test_deg_mins_secs() {
-    struct dec_mins_secs out;
-    memset(&out, 0, sizeof(struct dec_mins_secs));
-    to_dms(71.20088889, &out);
+    struct degrees_mins_secs out;
+    memset(&out, 0, sizeof(struct degrees_mins_secs));
+    dms_to_decimal_hours(71.20088889, &out);
 
-    ASSERT_EQUALS(71, out.base);
+    ASSERT_EQUALS(71, out.degrees);
     ASSERT_EQUALS(12, out.minutes);
     ASSERT_EQUALS(3, out.seconds);
     SUCCESS();
@@ -161,76 +181,78 @@ void test_response_ra() {
 
 void test_response_dec() {
     char response[35];
-    char *expected = "+10*28#";
+    char expected[35];
+    sprintf(expected, "+10%c28:04#", 223);
     response_dec(response, 10.46797995);
     ASSERT_EQUALS_STR(response, expected);
     SUCCESS();
 }
 
-void test_ra_command(struct coordinates *loc) {
+void test_ra_command(struct coordinates_config *loc) {
     char *command = "#:GR#";
     char *expected = "03:23:26#";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
 
-void test_dec_command(struct coordinates *loc) {
+void test_dec_command(struct coordinates_config *loc) {
     char *command = "#:GD#";
-    char *expected = "+87*40#";
+    char expected[35];
+    sprintf(expected, "+87%c40:28#", 223);
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
 
-void test_bad_command(struct coordinates *loc) {
+void test_bad_command(struct coordinates_config *loc) {
     char *command = ":BLA#";
     char expected[5];
     sprintf(expected, "%c", 21);
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
 
-void test_sync_ra_command(struct coordinates *loc) {
+void test_sync_ra_command(struct coordinates_config *loc) {
     char *command = "#:Q#:Sr01:37:26#";
     char *expected = "1";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
 
-void test_sync_dec_command(struct coordinates *loc) {
+void test_sync_dec_command(struct coordinates_config *loc) {
     char *command = ":Sd+72�06:40#";
     char *expected = "1";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
 
-void test_sync_commit_command(struct coordinates *loc) {
+void test_sync_commit_command(struct coordinates_config *loc) {
     char *command = ":CM#";
     char *expected = "Polaris #";
     char response[35];
-    protocol_handle_request(command, response, loc);
+    protocol_dispatch(command, response, loc);
     ASSERT_EQUALS_STR(expected, response);
     SUCCESS();
 }
 
-void test_az_alt_conversion(struct coordinates *loc) {
+void test_az_alt_conversion(struct coordinates_config *loc) {
     set_test_time(1654451483);
 
     char * ra = "#:Q#:Sr12:55:02#";
     char * dec = ":Sd+55*50:37#";
     char response[35];
-    protocol_handle_request(ra, response, loc);
-    protocol_handle_request(dec, response, loc);
-    protocol_handle_request(":CM#", response, loc);
+    protocol_dispatch(ra, response, loc);
+    protocol_dispatch(dec, response, loc);
+    protocol_dispatch(":CM#", response, loc);
 
     ASSERT_EQUALS_LD(38.377500, rotary_get_azimuth()); // align on our boundary, slightly lossy
     ASSERT_EQUALS_LD(28.117500, rotary_get_altitude());
@@ -239,7 +261,6 @@ void test_az_alt_conversion(struct coordinates *loc) {
 
 
 void test_process_request() {
-
     wiringPiSetup();
 
     struct config c;
@@ -252,7 +273,7 @@ void test_process_request() {
     c.altitude_config.phase_a_pin = 8;
     c.altitude_config.phase_b_pin = 9;
 
-    struct coordinates loc;
+    struct coordinates_config loc;
     loc.latitude = 42.78842222;
     loc.longitude = -71.20088889;
 
@@ -276,15 +297,15 @@ void test_process_request() {
 void test_compute_az_and_alt() {
     struct azimuth_altitude out;
 
-    struct dec_mins_secs ra;
-    ra.base = 12; ra.minutes = 55; ra.seconds = 2;
-    long double ra_dec = from_dms(&ra);
+    struct degrees_mins_secs ra;
+    ra.degrees = 12; ra.minutes = 55; ra.seconds = 2;
+    long double ra_dec = decimal_hours_from_dms(&ra);
 
-    struct dec_mins_secs dec;
-    dec.base= 55; dec.minutes = 50; dec.seconds = 37;
-    long double dec_dec = from_dms(&dec);
+    struct degrees_mins_secs dec;
+    dec.degrees= 55; dec.minutes = 50; dec.seconds = 37;
+    long double dec_dec = decimal_hours_from_dms(&dec);
 
-    struct coordinates loc;
+    struct coordinates_config loc;
     loc.latitude = 42.78842222;
     loc.longitude = -71.20088889;
 
@@ -297,7 +318,6 @@ void test_compute_az_and_alt() {
 }
 
 int main() {
-
     test_to_dms();
     test_from_dms();
     test_jd();

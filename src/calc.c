@@ -11,22 +11,82 @@
 
 #define log(format, ...) printf("CALC: " format "\n" , ##__VA_ARGS__)
 
+// Do this once up, save a few ticks
 long double RAD_HELPER = M_PI / 180;
 long double DEG_HELPER = 180 / M_PI;
 
+/**
+ * C trigonometry functions require Radians.
+ * Convert Degree => Radian
+ * @param degree
+ * @return radian
+ */
 long double rad(long double deg) {
     return deg * RAD_HELPER;
 }
 
+/**
+ * C trigonometry functions require Radians.
+ * Convert Radian => Degree
+ * @param radian
+ * @return degree
+ */
 long double deg(long double rad) {
     return rad * DEG_HELPER;
 }
 
-long double decimal_hours(struct tm *tm_ptr) {
-    long double ld_sec = (long double) tm_ptr->tm_sec;
-    long double ld_min = (long double) tm_ptr->tm_min;
-    long double ld_hour = (long double) tm_ptr->tm_hour;
-    return (((ld_sec / 60) + ld_min) / 60) + ld_hour;
+/**
+ * Compute decimal hours for some Base (degrees or time).
+ * @param base
+ * @param minutes
+ * @param seconds
+ * @return decimal hours
+ */
+long double decimal_hours(long double base, long double minutes, long double seconds) {
+    return (((seconds / 60) + minutes) / 60) + base;
+}
+
+/**
+ * Many of the calculations require decimal hours.
+ * This function transforms a tm into decimal hours.
+ * @param tm_ptr
+ * @return decimal hours
+ */
+long double decimal_hours_from_tm(struct tm *tm_ptr) {
+    return decimal_hours(
+            (long double) tm_ptr->tm_hour,
+            (long double) tm_ptr->tm_min,
+            (long double) tm_ptr->tm_sec
+    );
+}
+
+/**
+ * Decompose decimal hours to degrees, minutes and seconds.
+ * This function is used for both Degrees and Time.
+ * @param deg
+ * @param ddms
+ * @return
+ */
+dms_ptr dms_to_decimal_hours(long double deg, dms_ptr out) {
+    out->degrees = TRUNC(deg);
+    long double minutes = (deg - out->degrees) * 60;
+    out->minutes = TRUNC(minutes);
+    out->seconds = (short) ((minutes - (long double) out->minutes) * 60);
+    return out;
+}
+
+/**
+ * Compute decimal hours.
+ * This function is used for both Degrees and Time.
+ * @param input
+ * @return
+ */
+long double decimal_hours_from_dms(dms_ptr input) {
+    return decimal_hours(
+            (long double)input->degrees,
+            (long double)input->minutes,
+            (long double)input->seconds
+    );
 }
 
 /**
@@ -35,10 +95,10 @@ long double decimal_hours(struct tm *tm_ptr) {
  * @param tm_ptr
  * @return
  */
-long double jd_from_time_t(struct tm *tm_ptr) {
+extern long double jd_from_tm(struct tm *tm_ptr) {
     struct tm tm = *tm_ptr;
     int year = tm.tm_year + 1900;
-    long double day_fraction = decimal_hours(tm_ptr) / 24;
+    long double day_fraction = decimal_hours_from_tm(tm_ptr) / 24;
     long double day_decimal = (long double) tm.tm_mday + day_fraction;
     year = (tm.tm_mon < 3 ? year - 1 : year);
     int month = tm.tm_mon + 1; // 0 index based ... :|
@@ -67,7 +127,7 @@ time_t get_time() {
 long double gst() {
     time_t t = get_time();
     struct tm *tm_ptr = localtime(&t);
-    return gst_from_jd_tm(jd_from_time_t(tm_ptr), tm_ptr);
+    return gst_from_jd_tm(jd_from_tm(tm_ptr), tm_ptr);
 }
 
 /**
@@ -79,7 +139,7 @@ long double gst_from_jd_tm(long double jd, struct tm *tm_ptr) {
     long double T = S / GST_TC0;
     long double T0 = GST_TC1 + (GST_TC2 * T) + (GST_TC3 * T * T);
     long double T0P = T0 - (24 * TRUNC(T0 / 24));
-    long double A = GST_UTC1 * decimal_hours(tm_ptr);
+    long double A = GST_UTC1 * decimal_hours_from_tm(tm_ptr);
     long double gst = A + T0P;
     return (gst - (24 * TRUNC(gst / 24)));
 }
@@ -134,24 +194,28 @@ long double ha(long double azimuth, long double altitude, long double latitude, 
 }
 
 /**
- * Compute Right Ascension.
- * @param lst
- * @param ha
- * @return
+ * Compute Right Ascension from a, AZ and latitude
+ * @param altitude
+ * @param azimuth
+ * @param latitude
+ * @return ra
  */
-long double ra(long double lst, long double ha) {
-    long double ra = lst - ha;
+long double ra(long double altitude, long double azimuth, coordinates_config_ptr location) {
+    long double local_sidereal_time = lst(gst(), location->longitude);
+    long double declination = dec(altitude, azimuth, location->latitude);
+    long double hour_angle = ha(azimuth, altitude, location->latitude, declination);
+    hour_angle /= (long double) 15;
+    long double ra = local_sidereal_time - hour_angle;
     return ra > 0 ? ra : ra + 24;
 }
 
-azimuth_altitude_ptr compute_az_and_alt(
+az_alt_ptr compute_az_and_alt(
         long double ra,
         long double dec,
-        coordinates_ptr location,
-        azimuth_altitude_ptr out
+        coordinates_config_ptr location,
+        az_alt_ptr out
 ) {
-    long double greenwich_sidereal_time = gst();
-    long double local_sidereal_time = lst(greenwich_sidereal_time, location->longitude);
+    long double local_sidereal_time = lst(gst(), location->longitude);
 
     long double hour_angle = local_sidereal_time - ra;
 
@@ -159,7 +223,7 @@ azimuth_altitude_ptr compute_az_and_alt(
         hour_angle += 24;
     }
 
-    if(hour_angle < 0) {
+    if (hour_angle < 0) {
         log("ERROR hour angle < 0 %Lf", hour_angle);
     }
 
@@ -186,25 +250,6 @@ azimuth_altitude_ptr compute_az_and_alt(
 
     out->azimuth = azimuth;
 
-    return  out;
-}
-
-/**
- * Compute decimal base, minutes secs.
- * @param deg
- * @param ddms
- * @return
- */
-struct dec_mins_secs *to_dms(long double deg, struct dec_mins_secs *out) {
-    out->base = TRUNC(deg);
-    long double minutes = (deg - out->base) * 60;
-    out->minutes = TRUNC(minutes);
-    out->seconds = (short) ((minutes - (long double) out->minutes) * 60);
     return out;
 }
 
-long double from_dms(struct dec_mins_secs *input) {
-    long double seconds = (long double) input->seconds / 60;
-    long double minutes = (long double) input->minutes + seconds;
-    return (long double) input->base + (minutes / 60);
-}

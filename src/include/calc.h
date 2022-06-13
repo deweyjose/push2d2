@@ -10,15 +10,8 @@
 
 #define TRUNC(x) ((int)(x))
 
-// Julian Datetime
-
 #define JD_CONSTANT 1720994.5
 
-long double jd();
-
-long double jd_from_time_t(struct tm *tm_ptr);
-
-// Greenwich Sidereal Time
 #define GST_JD_EPOCH 2451545.5
 #define GST_TC0 36525
 #define GST_TC1 6.697374558
@@ -26,59 +19,47 @@ long double jd_from_time_t(struct tm *tm_ptr);
 #define GST_TC3 0.000025862
 #define GST_UTC1 1.002737909
 
-// Greenwich Sidereal Time
-
 struct azimuth_altitude {
     long double azimuth;
     long double altitude;
 };
-typedef struct azimuth_altitude *azimuth_altitude_ptr;
+typedef struct azimuth_altitude *az_alt_ptr;
+
+struct degrees_mins_secs {
+    short degrees;
+    short minutes;
+    short seconds;
+};
+typedef struct degrees_mins_secs * dms_ptr;
+
+void set_test_time(time_t time);
+
+dms_ptr dms_to_decimal_hours(long double deg, dms_ptr out);
+
+long double decimal_hours_from_dms(dms_ptr input);
+
+long double jd_from_tm(struct tm *tm_ptr);
 
 long double gst();
 
 long double gst_from_jd_tm(long double jd, struct tm *tm_ptr);
 
-// Local Sidereal time
-
 long double lst(long double gst, long double longitude);
-
-// Declination
-
-long double dec(long double altitude, long double azimuth, long double latitude);
-
-// Hour Angle
 
 long double ha(long double azimuth, long double altitude, long double latitude, long double dec);
 
-// Right Ascension
+// public
+long double dec(long double altitude, long double azimuth, long double latitude);
 
-long double ra(long double lst, long double ha);
+// public
+long double ra(long double altitude, long double azimuth, coordinates_config_ptr location);
 
-// Altitude
-
-azimuth_altitude_ptr compute_az_and_alt(
+// public
+az_alt_ptr compute_az_and_alt(
         long double ra,
         long double dec,
-        coordinates_ptr location,
-        azimuth_altitude_ptr out
+        coordinates_config_ptr location,
+        az_alt_ptr out
 );
-
-// Azimuth
-
-long double az(long double dec, long double ra);
-
-// decimal base minutes seconds
-
-struct dec_mins_secs {
-    short base;
-    short minutes;
-    short seconds;
-};
-
-struct dec_mins_secs *to_dms(long double deg, struct dec_mins_secs *out);
-
-long double from_dms(struct dec_mins_secs *input);
-
-void set_test_time(time_t time);
 
 #endif //PUSH2D2_CALC_H
