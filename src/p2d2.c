@@ -17,7 +17,7 @@
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
-const int RAND_DIV = RAND_MAX / 100;
+const int RAND_DIV = RAND_MAX / 10;
 
 int main(int argc, char *argv[]) {
     log("Push2D2 version %d.%d", P2D2_VERSION_MAJOR, P2D2_MINOR);
@@ -83,6 +83,6 @@ int main(int argc, char *argv[]) {
             fflush(stdout);
         }
 
-        usleep(1000);
+        usleep(50000);
     }
 }
