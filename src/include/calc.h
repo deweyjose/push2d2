@@ -32,6 +32,12 @@ struct degrees_mins_secs {
 };
 typedef struct degrees_mins_secs * dms_ptr;
 
+void set_test_time(time_t time);
+
+dms_ptr dms_to_decimal_hours(long double deg, dms_ptr out);
+
+long double decimal_hours_from_dms(dms_ptr input);
+
 long double jd_from_tm(struct tm *tm_ptr);
 
 long double gst();
@@ -40,23 +46,20 @@ long double gst_from_jd_tm(long double jd, struct tm *tm_ptr);
 
 long double lst(long double gst, long double longitude);
 
-long double dec(long double altitude, long double azimuth, long double latitude);
-
 long double ha(long double azimuth, long double altitude, long double latitude, long double dec);
 
-long double ra(long double lst, long double ha);
+// public
+long double dec(long double altitude, long double azimuth, long double latitude);
 
+// public
+long double ra(long double altitude, long double azimuth, coordinates_config_ptr location);
+
+// public
 az_alt_ptr compute_az_and_alt(
         long double ra,
         long double dec,
         coordinates_config_ptr location,
         az_alt_ptr out
 );
-
-dms_ptr dms_to_decimal_hours(long double deg, dms_ptr out);
-
-long double decimal_hours_from_dms(dms_ptr input);
-
-void set_test_time(time_t time);
 
 #endif //PUSH2D2_CALC_H

@@ -110,12 +110,7 @@ char *protocol_handle_request(char *input, char *output, coordinates_config_ptr 
     } else if (strcmp(COMMAND_RA, input) == 0) {
         long double altitude = rotary_get_altitude();
         long double azimuth = rotary_get_azimuth();
-        long double greenwich_sidereal_time = gst();
-        long double local_sidereal_time = lst(greenwich_sidereal_time, location->longitude);
-        long double declination = dec(altitude, azimuth, location->latitude);
-        long double hour_angle = ha(azimuth, altitude, location->latitude, declination);
-        hour_angle /= (long double) 15;
-        return response_ra(output, ra(local_sidereal_time, hour_angle));
+        return response_ra(output, ra(altitude, azimuth, location));
     } else if (!regexec(&regex_sync_ra, input, 0, NULL, 0)) {
         short hours, minutes, seconds = 0;
         sscanf(input, SYNC_RA_FORMAT, &hours, &minutes, &seconds);

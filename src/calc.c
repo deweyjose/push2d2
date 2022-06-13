@@ -95,7 +95,7 @@ long double decimal_hours_from_dms(dms_ptr input) {
  * @param tm_ptr
  * @return
  */
-long double jd_from_tm(struct tm *tm_ptr) {
+extern long double jd_from_tm(struct tm *tm_ptr) {
     struct tm tm = *tm_ptr;
     int year = tm.tm_year + 1900;
     long double day_fraction = decimal_hours_from_tm(tm_ptr) / 24;
@@ -194,13 +194,18 @@ long double ha(long double azimuth, long double altitude, long double latitude, 
 }
 
 /**
- * Compute Right Ascension.
- * @param lst
- * @param ha
- * @return
+ * Compute Right Ascension from a, AZ and latitude
+ * @param altitude
+ * @param azimuth
+ * @param latitude
+ * @return ra
  */
-long double ra(long double lst, long double ha) {
-    long double ra = lst - ha;
+long double ra(long double altitude, long double azimuth, coordinates_config_ptr location) {
+    long double local_sidereal_time = lst(gst(), location->longitude);
+    long double declination = dec(altitude, azimuth, location->latitude);
+    long double hour_angle = ha(azimuth, altitude, location->latitude, declination);
+    hour_angle /= (long double) 15;
+    long double ra = local_sidereal_time - hour_angle;
     return ra > 0 ? ra : ra + 24;
 }
 
@@ -210,8 +215,7 @@ az_alt_ptr compute_az_and_alt(
         coordinates_config_ptr location,
         az_alt_ptr out
 ) {
-    long double greenwich_sidereal_time = gst();
-    long double local_sidereal_time = lst(greenwich_sidereal_time, location->longitude);
+    long double local_sidereal_time = lst(gst(), location->longitude);
 
     long double hour_angle = local_sidereal_time - ra;
 

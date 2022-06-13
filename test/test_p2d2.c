@@ -146,10 +146,15 @@ void test_ha() {
 }
 
 void test_ra() {
-    long double lst = 14.41672417;
-    long double ha = 1.5422805;
-    long double result = ra(lst, ha);
-    long double expected = 12.87444367;
+    long double altitude = 30.615;
+    long double azimuth = 365.7;
+    struct coordinates_config loc;
+    loc.latitude = 42.78842222;
+    loc.longitude = -71.20088889;
+    set_test_time(1654451483);
+
+    long double result = ra(altitude, azimuth, &loc);
+    long double expected = 16.578842;
 
     ASSERT_EQUALS_LD(result, expected);
     SUCCESS();
