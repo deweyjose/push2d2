@@ -102,7 +102,7 @@ char *response_dec(char *buffer, long double dec) {
  * @param location
  * @return
  */
-char *protocol_handle_request(char *input, char *output, coordinates_ptr location) {
+char *protocol_handle_request(char *input, char *output, coordinates_config_ptr location) {
     if (strcmp(COMMAND_DEC, input) == 0) {
         long double altitude = rotary_get_altitude();
         long double azimuth = rotary_get_azimuth();

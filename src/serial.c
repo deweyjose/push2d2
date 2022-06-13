@@ -15,17 +15,17 @@ int handle = 0;
  * @param config
  * @return 0|1
  */
-int serial_initialize(struct serial *config) {
+int serial_initialize(serial_config_ptr config) {
     handle = serialOpen(config->device, config->baud_rate);
     if (handle == -1) {
-        log("failed to initialize serial device %s, baud rate %d", config->device, config->baud_rate);
+        log("failed to initialize serial_config device %s, baud rate %d", config->device, config->baud_rate);
         return 0;
     }
     return 1;
 }
 
 /**
- * Write data to the serial interface.
+ * Write data to the serial_config interface.
  * @param data
  */
 void serial_write_response(char *data) {
@@ -34,7 +34,7 @@ void serial_write_response(char *data) {
 }
 
 /**
- * Read data from the serial interface into the buffer.
+ * Read data from the serial_config interface into the buffer.
  * This needs to be cleaned up further. The protocol
  * layer should be the one to analyze the buffer for
  * command control characters.

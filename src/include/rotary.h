@@ -7,7 +7,7 @@
 
 #include "config.h"
 
-int rotary_initialize(const struct config * config);
+int rotary_initialize(config_ptr config);
 
 long double rotary_get_azimuth();
 

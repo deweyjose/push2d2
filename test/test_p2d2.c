@@ -183,7 +183,7 @@ void test_response_dec() {
     SUCCESS();
 }
 
-void test_ra_command(struct coordinates *loc) {
+void test_ra_command(struct coordinates_config *loc) {
     char *command = "#:GR#";
     char *expected = "03:23:26#";
     char response[35];
@@ -192,7 +192,7 @@ void test_ra_command(struct coordinates *loc) {
     SUCCESS();
 }
 
-void test_dec_command(struct coordinates *loc) {
+void test_dec_command(struct coordinates_config *loc) {
     char *command = "#:GD#";
     char expected[35];
     sprintf(expected, "+87%c40:28#", 223);
@@ -202,7 +202,7 @@ void test_dec_command(struct coordinates *loc) {
     SUCCESS();
 }
 
-void test_bad_command(struct coordinates *loc) {
+void test_bad_command(struct coordinates_config *loc) {
     char *command = ":BLA#";
     char expected[5];
     sprintf(expected, "%c", 21);
@@ -212,7 +212,7 @@ void test_bad_command(struct coordinates *loc) {
     SUCCESS();
 }
 
-void test_sync_ra_command(struct coordinates *loc) {
+void test_sync_ra_command(struct coordinates_config *loc) {
     char *command = "#:Q#:Sr01:37:26#";
     char *expected = "1";
     char response[35];
@@ -221,7 +221,7 @@ void test_sync_ra_command(struct coordinates *loc) {
     SUCCESS();
 }
 
-void test_sync_dec_command(struct coordinates *loc) {
+void test_sync_dec_command(struct coordinates_config *loc) {
     char *command = ":Sd+72�06:40#";
     char *expected = "1";
     char response[35];
@@ -230,7 +230,7 @@ void test_sync_dec_command(struct coordinates *loc) {
     SUCCESS();
 }
 
-void test_sync_commit_command(struct coordinates *loc) {
+void test_sync_commit_command(struct coordinates_config *loc) {
     char *command = ":CM#";
     char *expected = "Polaris #";
     char response[35];
@@ -239,7 +239,7 @@ void test_sync_commit_command(struct coordinates *loc) {
     SUCCESS();
 }
 
-void test_az_alt_conversion(struct coordinates *loc) {
+void test_az_alt_conversion(struct coordinates_config *loc) {
     set_test_time(1654451483);
 
     char * ra = "#:Q#:Sr12:55:02#";
@@ -268,7 +268,7 @@ void test_process_request() {
     c.altitude_config.phase_a_pin = 8;
     c.altitude_config.phase_b_pin = 9;
 
-    struct coordinates loc;
+    struct coordinates_config loc;
     loc.latitude = 42.78842222;
     loc.longitude = -71.20088889;
 
@@ -300,7 +300,7 @@ void test_compute_az_and_alt() {
     dec.degrees= 55; dec.minutes = 50; dec.seconds = 37;
     long double dec_dec = decimal_hours_from_dms(&dec);
 
-    struct coordinates loc;
+    struct coordinates_config loc;
     loc.latitude = 42.78842222;
     loc.longitude = -71.20088889;
 

@@ -5,17 +5,17 @@
 #ifndef P2D2_CONFIG_H
 #define P2D2_CONFIG_H
 
-struct serial {
+struct serial_config {
     char * device;
     short baud_rate;
 };
-typedef struct serial * serial_ptr;
+typedef struct serial_config * serial_config_ptr;
 
-struct coordinates {
+struct coordinates_config {
     long double latitude;
     long double longitude;
 };
-typedef struct coordinates * coordinates_ptr;
+typedef struct coordinates_config * coordinates_config_ptr;
 
 struct display_config {
     short rows;
@@ -43,8 +43,8 @@ struct rotary_config {
 typedef struct rotary_config * rotary_config_ptr;
 
 struct config {
-    struct serial serial;
-    struct coordinates coordinates;
+    struct serial_config serial;
+    struct coordinates_config coordinates;
     struct display_config display_config;
     struct rotary_config azimuth_config;
     struct rotary_config altitude_config;

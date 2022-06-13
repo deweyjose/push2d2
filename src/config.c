@@ -57,8 +57,8 @@ int config_load(config_ptr config, char *filename) {
     };
 
     cfg_opt_t secs_opts[] = {
-            CFG_SEC("serial", serial_opts, CFGF_NONE),
-            CFG_SEC("coordinates", coordinates_opts, CFGF_NONE),
+            CFG_SEC("serial_config", serial_opts, CFGF_NONE),
+            CFG_SEC("coordinates_config", coordinates_opts, CFGF_NONE),
             CFG_SEC("display", display_opts, CFGF_NONE),
             CFG_SEC("rotary", rotary_opts, CFGF_TITLE | CFGF_MULTI)
     };
@@ -71,7 +71,7 @@ int config_load(config_ptr config, char *filename) {
         return 0;
     }
 
-    cfg_t *serial_cfg = cfg_getsec(cfg, "serial");
+    cfg_t *serial_cfg = cfg_getsec(cfg, "serial_config");
 
     char *tmpDevice = cfg_getstr(serial_cfg, "device");
     unsigned int str_len = strlen(tmpDevice) + 1;
@@ -82,7 +82,7 @@ int config_load(config_ptr config, char *filename) {
 
     // map the options into the configuration struct
 
-    cfg_t *coordinates_cfg = cfg_getsec(cfg, "coordinates");
+    cfg_t *coordinates_cfg = cfg_getsec(cfg, "coordinates_config");
     config->coordinates.longitude = cfg_getfloat(coordinates_cfg, "longitude");
     config->coordinates.latitude = cfg_getfloat(coordinates_cfg, "latitude");
 
@@ -126,7 +126,7 @@ int config_load(config_ptr config, char *filename) {
 
 void config_dump(config_ptr config) {
     log("CONFIG dump:");
-    log("coordinates:");
+    log("coordinates_config:");
     log("  latitude: %LF", config->coordinates.latitude);
     log("  longitude: %LF", config->coordinates.longitude);
     log("display:");

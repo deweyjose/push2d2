@@ -49,7 +49,7 @@ long double ra(long double lst, long double ha);
 az_alt_ptr compute_az_and_alt(
         long double ra,
         long double dec,
-        coordinates_ptr location,
+        coordinates_config_ptr location,
         az_alt_ptr out
 );
 

@@ -14,7 +14,7 @@ struct serial_buffer {
 };
 typedef struct serial_buffer * sb_ptr;
 
-int serial_initialize(struct serial * config);
+int serial_initialize(serial_config_ptr config);
 
 int serial_read_command(sb_ptr buffer);
 

@@ -11,7 +11,7 @@
 
 int lcd = 0;
 
-int display_initialize(const struct config *s) {
+int display_initialize(config_ptr s) {
     log("initializing");
 
     int mode4 = s->display_config.bit_mode == 4;

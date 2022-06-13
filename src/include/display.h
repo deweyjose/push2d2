@@ -7,7 +7,7 @@
 
 #include <config.h>
 
-int display_initialize(const struct config *s);
+int display_initialize(config_ptr s);
 
 void display_clear();
 
