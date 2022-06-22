@@ -17,8 +17,6 @@
 
 #define log(format, ...) printf("P2D2: " format "\n" , ##__VA_ARGS__)
 
-const int RAND_DIV = RAND_MAX / 10;
-
 int main(int argc, char *argv[]) {
     log("Push2D2 version %d.%d", P2D2_VERSION_MAJOR, P2D2_MINOR);
 
@@ -49,22 +47,25 @@ int main(int argc, char *argv[]) {
         return ERROR_INITIALIZE_SERIAL;
     }
 
-    if (!protocol_initialize()){
+    if (!protocol_initialize()) {
         log("failed to initialize protocol layer");
         return ERROR_INITIALIZE_PROTOCOL;
     }
 
-    display_text("move the scope", 0);
+    display_text("move the scope!", 0);
 
     fflush(stdout);
 
     char sb_buffer[32];
     struct serial_buffer sb;
     sb.current_position = 0;
-    sb.stop_char= '#';
+    sb.stop_char = '#';
     sb.length = 32;
     sb.buffer = sb_buffer;
 
+    usleep(2000000);
+
+    display_clear();
     while (1) {
         if (serial_read_command(&sb)) {
             char response[32];
@@ -73,15 +74,12 @@ int main(int argc, char *argv[]) {
             sb.current_position = 0;
         }
 
-        if ((rand()/RAND_DIV) == 3) {
-            display_clear();
-            char buffer[16];
-            sprintf(buffer, "A  %Lf", rotary_get_altitude());
-            display_text(buffer, 0);
-            sprintf(buffer, "AZ %Lf", rotary_get_azimuth());
-            display_text(buffer, 1);
-            fflush(stdout);
-        }
+        char buffer[16];
+        sprintf(buffer, "A  %Lf", rotary_get_altitude());
+        display_text(buffer, 0);
+        sprintf(buffer, "AZ %Lf", rotary_get_azimuth());
+        display_text(buffer, 1);
+        fflush(stdout);
 
         usleep(50000);
     }
