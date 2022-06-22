@@ -75,9 +75,9 @@ int main(int argc, char *argv[]) {
         }
 
         char buffer[16];
-        sprintf(buffer, "A  %Lf", rotary_get_altitude());
+        sprintf(buffer, " A %9.5f", rotary_get_altitude());
         display_text(buffer, 0);
-        sprintf(buffer, "AZ %Lf", rotary_get_azimuth());
+        sprintf(buffer, "AZ %9.5f", rotary_get_azimuth());
         display_text(buffer, 1);
         fflush(stdout);
 
