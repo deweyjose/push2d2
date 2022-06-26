@@ -136,6 +136,9 @@ char *protocol_dispatch(char *command, char *response, coordinates_config_ptr lo
         dec_dms.minutes = minutes;
         dec_dms.seconds = seconds;
         last_dec_sync = decimal_hours_from_dms(&dec_dms);
+        if (sign == '-') {
+            last_dec_sync *= -1;
+        }
 
         log("accept sync DEC %Lf", last_dec_sync);
 
