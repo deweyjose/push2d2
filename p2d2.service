@@ -1,0 +1,9 @@
+[Unit]
+Description=P2D2
+After=multi-user.target
+
+[Service]
+ExecStart=/home/pi/p2d2/p2d2 /home/pi/p2d2/p2d2.conf
+
+[Install]
+WantedBy=multi-user.target
