@@ -101,7 +101,7 @@ Some back of the envelope math:
 Some additional perspective on angular diameters: The Sun is 32'32", Moon 29'24" and Betelgeuse is 0.055". 
 
 The encoder by itself is not precise enough to be useful here. 
-I can see anything in the sky 0.3&deg; wide, even in Bortle 5.
+I can see anything in the sky 0.15&deg; wide, even in Bortle 5.
 
 ### Custom Parts - 3D Printing...
 
