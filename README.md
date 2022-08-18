@@ -83,7 +83,7 @@ We'd see the opposite, A lead phase B if the shaft was rotating counterclockwise
 As the encoder rotates the RPI detects changes in the GPIO pin status and either decrements or
 increments a count, which can then be transformed into degrees - we know the total count per revolution. 
 
-<img src="docs/img/quadrature.png" width="300">
+<img src="docs/img/quadrature.png" width="300" style="background-color: aliceblue">
 
 The encoder has 4 wires - ground, 5V, B phase (white), A phase (green). Phase A and B are connected to 
 GPIO pins on the RPI and a 10K pull-up resistor connects A and B to 5V.
