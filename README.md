@@ -132,7 +132,7 @@ more time on TinkerCad I think we could get an even better ratio. I've listed th
 
 #### [Encoder Shaft Gear](https://www.tinkercad.com/things/fiU2G8Lcno1-encoder-shaft-gear)
 This print was interesting and impressive to me. There is a very subtle flat section on the internal structure of the gear.
-This allows the gear to be seated on the companion flat section of the encoder shaft to prevent slippage.
+This allows the gear to be seated on the companion flat section of the encoder shaft to prevent slippage. The section is only 2mm long.
 
 <img src="docs/img/encoder-gear-shaft.png" width="150">
 
