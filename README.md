@@ -81,7 +81,7 @@ It's out of scope, way out of scope, to describe in detail how Quadature encoder
 In the images below we see a clockwise rotation as phase B leads phase A. 
 We'd see the opposite, A lead phase B if the shaft was rotating counterclockwise.
 As the encoder rotates the RPI detects changes in the GPIO pin status and either decrements or
-increments a count, which can then be transformed into degrees - we know the total count per revolution. 
+increments a count, which can then be transformed into degrees as we know the totaly count per single revolution of the shaft.
 
 <img src="docs/img/quadrature.jpg" width="300">
 
