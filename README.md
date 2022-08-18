@@ -239,12 +239,13 @@ There is way too much information out there.
 
 I finally purchased a book, [Practical Astronomy With Your Calculator](https://www.amazon.com/gp/product/1108436072/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1), that really helped. I prototyped the equations in a google sheet first. Once I was able to compute RA and Dec properly there I ported it to [calc.c](src/calc.c).  
 
-# Outcome...
+## It works.
 Success. Maiden voyage on 6/24/2022 and it worked! Tracking was incredibly accurate, better than I had hoped for. I was able to find two star clusters that I would have no chance of finding by star hopping.
 
 - [Messier 92](https://en.wikipedia.org/wiki/Messier_92). It was dim but I saw the general shape of the cluster.
 - [Messier 13](https://en.wikipedia.org/wiki/Messier_13). Similar to M92 - dim but I saw it.
 
+Here's a quick demonstration [video](https://www.youtube.com/watch?v=JkiqZz89DCk).
 
 # Appendix
 - [Practical Astronomy With Your Calculator](https://www.amazon.com/gp/product/1108436072/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
