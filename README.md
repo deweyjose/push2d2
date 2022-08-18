@@ -147,22 +147,9 @@ In the same spirit as the Pi Mount... just get it securely fastened to the Dobso
 
 <img src="docs/img/pcb-mount.png" width="150">
 
-
-#### Mounted...
-Here are a few pictures with all the hardware mounted. Not pretty, but does the trick.
-
-<img src="docs/img/altitude-gear1.jpg" width="150">
-<img src="docs/img/altitude-gear2.jpg" width="150">
-
-<img src="docs/img/azimuth-gear1.jpg" width="150">
-<img src="docs/img/azimuth-gear2.jpg" width="150">
-
-<img src="docs/img/sideview.jpg" width="150">
-<img src="docs/img/p2d2.JPG" width="200">
-
 ### Code
 
-... under construction
+
 
 ### Soldering
 
@@ -171,13 +158,68 @@ It became really annoying in the 95&deg; heat wave this summer when
 parts of the system melted off...
 
 Luckily I had a soldering iron kicking around. I ended up solding a breakout
-board connected to the Raspberry PI to a solderable PCB board. Once I got the hang of it (post 3 burns...)
+board connected to the Raspberry PI to a solderable PCB board. Once I got the hang of it (3 burns later...)
 I found soldering to be pretty satisfying. I'm looking forward to the next project that requires it.
 
+<img src="docs/img/wired-up.jpg" width="200">
+
+### Installed
+Here are a few pictures with all the hardware installed. Not pretty, but does the trick.
+
+<table style="border: none">
+<tr>
+<td><img src="docs/img/altitude-gear1.jpg" width="150"></td>
+<td><img src="docs/img/altitude-gear2.jpg" width="150"></td>
+</tr>
+<tr>
+<td><img src="docs/img/azimuth-gear1.jpg" width="150"></td>
+<td><img src="docs/img/azimuth-gear2.jpg" width="150"></td>
+</tr>
+<tr>
+<td><img src="docs/img/sideview.jpg" width="150"></td>
+<td><img src="docs/img/p2d2.JPG" width="200"></td>
+</tr>
+</table>
+
 ### Rabbit Holes
-- learning how to stick a 3D print
-- usb-to-ttl core, bad wiring :|
-- C based testing frameworks
+A few time sinks that almost made me give up.
+
+#### Stick a 3D print
+This was pretty painful, actually. I may have scratched the print bed, unsure. 
+I ended up applying a coat of glue stick residue on the bed. My success rate when from single digits to 95%.
+The base layer of plastic needs to stick to the bed, otherwise you get...
+
+<img src="docs/img/bad-print.jpg" width="250">
+
+#### Bad Hardware...
+
+Stellarium running on my computer communicates with the Raspberry Pi over a serial connection.
+
+The Rasberry Pi supports Serial communication over the UART pins - TXD, RXD.
+
+Plug one end into of the cable into a USB port, connect the black lead to Pi Ground, White lead to Pi TXD, Green lead to Pi RXD.
+
+<img src="docs/img/pi-console.jpg" width="200">
+
+Easy peasy... Except... when the chip is wired like this!
+
+<img src="docs/img/usb-2-ttl-wiring.jpg" width="200">
+
+Ultimately I tracked this down with a volt meter. I noticed it was reading -5V so I cracked it open. I was refunded and received a new one no problem.
+
+I did win the battle, but it was 3 days long.
+
+#### C based testing frameworks
+
+Couldn't get catch2, gtest, ctest working... threw it all out and wrote my own
+small set of macros for to help me write a custom test executable. Done.
+
+#### The required math
+
+I wasted a lot of time trying to learn all the necessary equations conversions etc via [google searches](https://www.google.com/search?q=convert+horizon+coordinate+to+equatorial&oq=convert+horizon+coordinate+to+equatorial&aqs=chrome..69i57.20723j0j7&sourceid=chrome&ie=UTF-8_). 
+There is way too much information out there.
+
+I finally purchased a book, [Practical Astronomy With Your Calculator](https://www.amazon.com/gp/product/1108436072/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1), that really helped. I prototyped the equations in a google sheet first. Once I was able to compute RA and Dec properly there I ported it to [calc.c](src/calc.c).  
 
 # Appendix
 - [Practical Astronomy With Your Calculator](https://www.amazon.com/gp/product/1108436072/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
@@ -190,6 +232,7 @@ I found soldering to be pretty satisfying. I'm looking forward to the next proje
   - [Horizon Coodinates](https://en.wikipedia.org/wiki/Horizontal_coordinate_system#:~:text=The%20horizontal%20coordinate%20system%20is,%2Dazimuth%20system%2C%20among%20others.)
 - [Rotary Encoder](https://www.amazon.com/gp/product/B085ZLCYS1/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=)
 - [Great Blog on Rotary Encoders](https://aleksandarhaber.com/incremental-rotary-encoders-with-raspberry-pi-lpd3806-600bm/)
+- [Setup USB/Serial Communication with Pi](https://learn.adafruit.com/adafruits-raspberry-pi-lesson-5-using-a-console-cable/overview)
 - 3D Printing
   - [Tinker Cad](https://www.tinkercad.com/dashboard)
   - [Ultimaker Cura Slicer](https://ultimaker.com/software/ultimaker-cura)
