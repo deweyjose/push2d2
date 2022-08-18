@@ -149,8 +149,26 @@ In the same spirit as the Pi Mount... just get it securely fastened to the Dobso
 
 ### Code
 
+The code is relatively straight forward. All the code is written in C. 
 
+The WiringPi library is used for:
+- serial communcation
+- monitoring GPIO pin state changes
+- lcd APIs
 
+Directory
+- [serial.c](src/serial.c) simple wrapper over WiringPI serial communication APIs
+- [rotary.c](src/rotary.c) monitoring state changes on GPIO pins connected to the encoders. It also manages the scopes current Alitude and Azimuth horizontal coordinates.
+- [protocol.c](src/protocol.c) implements a very small section of the LX200 line protocol. The sync to commands make calibration trivial. Point the scope at a well known object in the sky - instruct Stellarium to sync. Stellarium then sends P2D2 equitorial coodinates that it converts to Horizontal and ultimately to count on each encoder. 
+  - query current DEC
+  - query current RA
+  - sync to DEC
+  - sync to RA
+- [display.c](src/display.c) a simple wrapper over the WiringPI lcd API. The current A/Az coordinates are displayed.
+- [config.c](src/config.c) libconfuse was used to implement a configuration parser. The configuration supports various settings used by P2D2. Checkout [p2d2.conf](p2d2.conf).
+- [p2d2.c](src/p2d2.c) main(). Initialized the libraries, loads the config, executes the main run loop.
+- [calc.c](src/calc.c) contains all the math...
+- [tests](test/test_p2d2.c) unit tests for all of the math as well as the LX200 protocol parsing and command execution
 ### Soldering
 
 I did start poc the system with bread boards and tape. 
@@ -220,6 +238,13 @@ I wasted a lot of time trying to learn all the necessary equations conversions e
 There is way too much information out there.
 
 I finally purchased a book, [Practical Astronomy With Your Calculator](https://www.amazon.com/gp/product/1108436072/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1), that really helped. I prototyped the equations in a google sheet first. Once I was able to compute RA and Dec properly there I ported it to [calc.c](src/calc.c).  
+
+# Outcome...
+Success. Maiden voyage on 6/24/2022 and it worked! Tracking was incredibly accurate, better than I had hoped for. I was able to find two star clusters that I would have no chance of finding by star hopping.
+
+- [Messier 92](https://en.wikipedia.org/wiki/Messier_92). It was dim but I saw the general shape of the cluster.
+- [Messier 13](https://en.wikipedia.org/wiki/Messier_13). Similar to M92 - dim but I saw it.
+
 
 # Appendix
 - [Practical Astronomy With Your Calculator](https://www.amazon.com/gp/product/1108436072/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
